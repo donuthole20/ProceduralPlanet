@@ -32,7 +32,6 @@ int main(void)
 	{
 		Noise noise;
 		std::vector<INoiseSettings*> noiseSettings;
-		
 
 		SimpleNoiseSettings settings1;
 		settings1.strength = 0.15f;
@@ -76,19 +75,10 @@ int main(void)
 		directions.emplace_back(0.0f, 0.0f, -1.0f);
 
 		size_t resolution = 100;
-		
 
-		//Not threaded
-		/*
-		for (int i = 0; i < directions.size(); i++)
-		{
-			faces.emplace_back(resolution);
-			faces[i].createMesh(&directions[i], &noise, &noiseSettings);
-			faces[i].bindToGPU();
-				
-		}
-		*/
 
+#define THREADED
+#ifdef THREADED
 		//threaded
 		std::vector<std::thread> workers;
 		workers.reserve(faces.size());
@@ -107,7 +97,20 @@ int main(void)
 
 		}
 		workers.clear();
+#else
+		//Not threaded
+		for (int i = 0; i < directions.size(); i++)
+		{
+			faces.emplace_back(resolution);
+			faces[i].createMesh(&directions[i], &noise, &noiseSettings);
+			faces[i].bindToGPU();
+
+		}
 		
+#endif // THREADED		
+
+
+
 	
 
 		noiseSettings.clear();
@@ -115,7 +118,6 @@ int main(void)
 	}
 
 
-	using namespace std::placeholders;
 	Camera camera = Camera(45.0f, window.getAspectRatio(), 0.01f, 100.0f);
 	Input* inputManager = window.getInputManger();
 	//inputManager->registerKeyInputCallback(&camera);
