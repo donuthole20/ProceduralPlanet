@@ -74,16 +74,16 @@ void Window::cursor_position_callback(GLFWwindow* window, double xpos, double yp
 
 	if (callbackWindow->mouseFirstMoved)
 	{
-		callbackWindow->lastX = xpos;
-		callbackWindow->lastY = ypos;
+		callbackWindow->lastX = (float)xpos;
+		callbackWindow->lastY = (float)ypos;
 		callbackWindow->mouseFirstMoved = false;
 	}
 
-	callbackWindow->xChange = xpos - callbackWindow->lastX;
-	callbackWindow->yChange = callbackWindow->lastY - ypos;
+	callbackWindow->xChange = (float)xpos - callbackWindow->lastX;
+	callbackWindow->yChange = callbackWindow->lastY - (float)ypos;
 
-	callbackWindow->lastX = xpos;
-	callbackWindow->lastY = ypos;
+	callbackWindow->lastX = (float)xpos;
+	callbackWindow->lastY = (float)ypos;
 
 	callbackWindow->getInputManger()->processCursorPosition(callbackWindow->xChange, callbackWindow->yChange);
 }

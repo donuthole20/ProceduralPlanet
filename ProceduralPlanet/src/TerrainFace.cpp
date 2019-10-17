@@ -4,7 +4,7 @@
 #include "OpenGLErrorHandler.h"
 
 TerrainFace::TerrainFace(size_t resolution)
-:resolution(glm::min(glm::abs((int)resolution), 250))
+:resolution(glm::min(glm::abs((int)resolution), 250))//TODO max resolution to take into acount max capacity of vector
 {
 	positions = std::vector<glm::vec3>(resolution * resolution, glm::vec3(0, 0, 0));
 	indices = std::vector<unsigned int>(((resolution - 1) * (resolution - 1) * 6), 0);
@@ -68,7 +68,7 @@ void TerrainFace::createMesh(glm::vec3* localUp, Noise* noise, std::vector<INois
 			}
 		}
 	}
-
+	calculateAverageNormals();
 }
 
 void TerrainFace::bindToGPU()
@@ -79,9 +79,12 @@ void TerrainFace::bindToGPU()
 	GLCall(glGenBuffers(1, &vertexBufferID));
 	GLCall(glBindBuffer(GL_ARRAY_BUFFER, vertexBufferID));
 	GLCall(glBufferData(GL_ARRAY_BUFFER, sizeof(float) * positions.size() * 3, &positions[0], GL_STATIC_DRAW));//size of array * 3 for 3 floats in a vertex
-	GLCall(glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), 0));
+	
+	GLCall(glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), 0));
 	GLCall(glEnableVertexAttribArray(0));
-
+	GLCall(glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)(sizeof(float) * 3)));
+	GLCall(glEnableVertexAttribArray(1));
+	
 	GLCall(glBindBuffer(GL_ARRAY_BUFFER, 0));
 	GLCall(glBindVertexArray(0));
 	positions.clear();
@@ -90,7 +93,6 @@ void TerrainFace::bindToGPU()
 	GLCall(glGenBuffers(1, &indexBufferID));
 	GLCall(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indexBufferID));
 	GLCall(glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(unsigned int) * indices.size(), &indices[0], GL_STATIC_DRAW));
-
 
 	GLCall(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0));
 	indices.clear();
@@ -110,4 +112,34 @@ void TerrainFace::deleteFromGPU()
 	GLCall(glDeleteVertexArrays(1,&vertexArrayObjectID));
 	GLCall(glDeleteBuffers(1,&vertexBufferID));
 	GLCall(glDeleteBuffers(1, &indexBufferID));
+}
+
+void TerrainFace::calculateAverageNormals()//TODO: Refactor, 
+{
+	std::vector<glm::vec3> normals(positions.size(),glm::vec3(0.0f));
+	for (size_t i = 0; i < indices.size(); i+=3)
+	{
+		unsigned int in0 = indices[i];
+		unsigned int in1 = indices[i + 1];
+		unsigned int in2 = indices[i + 2];
+		glm::vec3 v1(positions[in1] - positions[in0]);
+		glm::vec3 v2(positions[in2] - positions[in0]);
+		glm::vec3 normal = glm::cross(v1, v2);
+		normal = glm::normalize(normal);
+
+		normals[in0] += normal;
+		normals[in1] += normal;
+		normals[in2] += normal;
+	}
+
+	std::vector<glm::vec3> normalVector;
+	normalVector.reserve(positions.size() * 2);
+	for (size_t i = 0; i < normals.size(); i++)
+	{
+		normals[i] = normalize(normals[i]);
+		normalVector.emplace_back(positions[i]);
+		normalVector.emplace_back(normalize(normals[i]));
+	}
+	positions.clear();
+	positions = normalVector;
 }

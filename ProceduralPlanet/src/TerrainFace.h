@@ -48,7 +48,6 @@ public:
 	}
 };
 
-
 class SimpleNoiseSettings :public INoiseSettings
 {
 public:
@@ -83,6 +82,7 @@ class TerrainFace
 		size_t resolution;
 		std::vector<glm::vec3> positions;
 		std::vector<unsigned int> indices;
+		std::vector<glm::vec3> normals;
 
 	public:
 		~TerrainFace();
@@ -91,5 +91,6 @@ class TerrainFace
 		void bindToGPU();
 		void draw();
 		void deleteFromGPU();
+		void calculateAverageNormals();
 };
 

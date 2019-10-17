@@ -1,22 +1,26 @@
 #include "Log.h"
 
 #include <iostream>
-#include <stdio.h>
-
+#include "ConfigMacros.h"
 
 void Log::LogDebug(const char* log)
 {
+#if ENABLE_LOG == 1
 	std::cout << __FILE__ << ":" << __LINE__ << " Log: " << log << "\n";
+#endif
 }
 
 void Log::LogError(const char* error)
 {
-	printf("%s:%d Error: %s", __FILE__, __LINE__, error);
+#if ENABLE_LOG == 1
 	std::cout << __FILE__ << ":" << __LINE__ << " Error: " << error <<"\n";
 	__debugbreak();
+#endif
 }
 
 void Log::LogVec3(glm::vec3 vec)
 {
+#if ENABLE_LOG == 1
 	std::cout << "x:" << vec.x << " y:" << vec.y << "z:" << vec.z << "\n";
+#endif
 }

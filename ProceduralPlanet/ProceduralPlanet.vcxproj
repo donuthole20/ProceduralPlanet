@@ -170,6 +170,7 @@
     <ClCompile Include="src\Window.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="src\ConfigMacros.h" />
     <ClInclude Include="src\Noise.h" />
     <ClInclude Include="src\Planet.h" />
     <ClInclude Include="src\Camera.h" />

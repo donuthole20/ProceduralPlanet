@@ -6,10 +6,11 @@
 #include <thread>
 
 
+#include "ConfigMacros.h"
+#include "Log.h"
 
 #include "TerrainFace.h"
 #include "Shader.h" 
-#include "Log.h"
 #include "Camera.h"
 #include "Window.h"
 #include "Input.h"
@@ -59,7 +60,7 @@ int main(void)
 		settings3.roughness = 3.3f;
 		settings3.persistence = 0.5f;
 		settings3.center = glm::vec3(0.0f);
-		settings3.minValue = 0.37;
+		settings3.minValue = 0.37f;
 		settings3.weightMultiplier = 0.78f;
 		noiseSettings.push_back(&settings3);
 		
@@ -72,12 +73,10 @@ int main(void)
 		directions.emplace_back(1.0f, 0.0f, 0.0f);
 		directions.emplace_back(0.0f, 0.0f, 1.0f);
 		directions.emplace_back(0.0f, 0.0f, -1.0f);
+		
+		size_t resolution = 10;
 
-		size_t resolution = 100;
-
-
-#define THREADED
-#ifdef THREADED
+#if THREADED == 1
 		//threaded
 		std::vector<std::thread> workers;
 		workers.reserve(faces.size());
@@ -89,29 +88,26 @@ int main(void)
 				});
 		}
 
-		for (int i = 0; i < faces.size(); i++)
+		for (int i = 0; i < workers.size(); i++)
 		{
 			workers[i].join();
 			faces[i].bindToGPU();
-
 		}
+
 		workers.clear();
+
 #else
 		//Not threaded
 		for (int i = 0; i < directions.size(); i++)
 		{
 			faces.emplace_back(resolution);
 			faces[i].createMesh(&directions[i], &noise, &noiseSettings);
+			faces[i].calculateAverageNormals();
 			faces[i].bindToGPU();
 
 		}
 		
-#endif // THREADED		
-
-
-
-	
-
+#endif 
 		noiseSettings.clear();
 		directions.clear();
 	}
@@ -137,7 +133,7 @@ int main(void)
 	while (!window.isClosing())
 	{
 
-#ifdef ENABLE_KEY_INPUT
+#if ENABLE_KEY_INPUT == 1
 		float now = window.getCurrentTime();
 		float deltaTime = now - lastTime;
 		lastTime = now;
