@@ -21,6 +21,14 @@ void Input::unRegisterCallback(unsigned int ID)
 
 void Input::processKeyInput(int key, int action)
 {
+	if (action == PRESS)
+	{
+		keyPressedCount++;
+	}
+	else if(action == RELEASE)
+	{
+		keyPressedCount--;
+	}
 
 	for (int i = 0; i < keyInputCallbacks.size(); i++)
 	{
@@ -33,6 +41,19 @@ void Input::processCursorPosition(float xpos, float ypos)
 	for (int i = 0; i < mousePositionCallbacks.size(); i++)
 	{
 		mousePositionCallbacks[i]->handleMousePositionInput(xpos, ypos);
+	}
+}
+
+void Input::updateKeyInput(float deltaTime)
+{
+	if (keyPressedCount < 1)
+	{
+		//return;
+	}
+
+	for (size_t i = 0; i < keyInputCallbacks.size(); i++)
+	{
+		keyInputCallbacks[i]->handleKeyInputUpdate(deltaTime);
 	}
 }
 

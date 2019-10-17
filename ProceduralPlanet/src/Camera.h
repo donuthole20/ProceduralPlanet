@@ -12,6 +12,7 @@ private:
 	glm::vec3 position, front, up, right, worldUp;
 	float yaw, pitch;
 	float movementSpeed, turnSpeed;
+	unsigned char keyMap = 0;
 
 	void calculateDirectionVectors();
 public:
@@ -20,5 +21,6 @@ public:
 	glm::mat4 GetViewMatrix();
 	void handleKeyInput(int key, int action);
 	void handleMousePositionInput(float xChange, float yChange);
+	void handleKeyInputUpdate(float deltaTime);
 };
 

@@ -130,9 +130,17 @@ int main(void)
 	Shader shader = Shader("res/shaders/Planet.shader");
 	shader.UseShader();
 
+	float deltaTime, lastTime = 0.0f;
+
 	/* Loop until the user closes the window */
 	while (!window.isClosing())
 	{
+		float now = window.getCurrentTime();
+		deltaTime = now - lastTime;
+		lastTime = now;
+
+		inputManager->updateKeyInput(deltaTime);
+
 		window.clearColor();
 
 		shader.SetModelMatrix(model);

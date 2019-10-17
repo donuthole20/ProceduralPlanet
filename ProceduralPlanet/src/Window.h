@@ -19,6 +19,7 @@ private:
 public:
 	Window();
 	Window(int height, int width);
+	float getCurrentTime() { return glfwGetTime(); };
 	Input* getInputManger();
 	float getAspectRatio() { return aspectRatio; };
 	void clearColor();
