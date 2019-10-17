@@ -23,7 +23,6 @@ int main(void)
 	ShowWindow( GetConsoleWindow(), SW_HIDE );
 #endif 
 
-
 	Window window = Window(1366, 768);
 	
 	std::vector<TerrainFace> faces;
@@ -117,11 +116,13 @@ int main(void)
 		directions.clear();
 	}
 
-
 	Camera camera = Camera(45.0f, window.getAspectRatio(), 0.01f, 100.0f);
 	Input* inputManager = window.getInputManger();
-	//inputManager->registerKeyInputCallback(&camera);
 	inputManager->registerMousePositionInputCallback(&camera);
+
+#ifdef ENABLE_KEY_INPUT
+	inputManager->registerKeyInputCallback(&camera);
+#endif 
 
 	glm::mat4 model(1.0f);
 	model = glm::translate(model,glm::vec3(0.0f, 0.0f, -1.9f));
@@ -130,16 +131,18 @@ int main(void)
 	Shader shader = Shader("res/shaders/Planet.shader");
 	shader.UseShader();
 
-	float deltaTime, lastTime = 0.0f;
+	float lastTime = 0.0f;
 
 	/* Loop until the user closes the window */
 	while (!window.isClosing())
 	{
-		float now = window.getCurrentTime();
-		deltaTime = now - lastTime;
-		lastTime = now;
 
+#ifdef ENABLE_KEY_INPUT
+		float now = window.getCurrentTime();
+		float deltaTime = now - lastTime;
+		lastTime = now;
 		inputManager->updateKeyInput(deltaTime);
+#endif 
 
 		window.clearColor();
 
