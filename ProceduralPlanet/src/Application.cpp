@@ -18,6 +18,11 @@
 #include "Noise.h"
 
 
+#include "externallibs/imgui/imgui.h"
+#include "externallibs/imgui/imgui_impl_glfw.h"
+#include "externallibs/imgui/imgui_impl_opengl3.h"
+
+
 int main(void)
 {
 #ifdef RELEASE
@@ -25,10 +30,12 @@ int main(void)
 #endif 
 
 	Window window = Window(1366, 768);
+
 	
 	std::vector<TerrainFace> faces;
 	faces.reserve(6);
-	
+	size_t resolution = 50;
+
 	{
 		Noise noise;
 		std::vector<INoiseSettings*> noiseSettings;
@@ -74,7 +81,6 @@ int main(void)
 		directions.emplace_back(0.0f, 0.0f, 1.0f);
 		directions.emplace_back(0.0f, 0.0f, -1.0f);
 		
-		size_t resolution = 10;
 
 #if THREADED == 1
 		//threaded
@@ -84,14 +90,14 @@ int main(void)
 		{
 			faces.emplace_back(resolution);
 			workers.emplace_back([&faces,i, &directions, &noise, &noiseSettings] {
-				faces[i].createMesh(&directions[i], &noise, &noiseSettings);
+				faces[i].CreateMesh(&directions[i], &noise, &noiseSettings);
 				});
 		}
 
 		for (int i = 0; i < workers.size(); i++)
 		{
 			workers[i].join();
-			faces[i].bindToGPU();
+			faces[i].BindToGPU();
 		}
 
 		workers.clear();
@@ -112,46 +118,73 @@ int main(void)
 		directions.clear();
 	}
 
-	Camera camera = Camera(45.0f, window.getAspectRatio(), 0.01f, 100.0f);
-	Input* inputManager = window.getInputManger();
+	Camera camera = Camera(45.0f, window.GetAspectRatio(), 0.01f, 100.0f);
+	Input* inputManager = window.GetInputManger();
+#if ENABLE_INPUT == 1
 	inputManager->registerMousePositionInputCallback(&camera);
-
-#ifdef ENABLE_KEY_INPUT
 	inputManager->registerKeyInputCallback(&camera);
 #endif 
 
 	glm::mat4 model(1.0f);
-	model = glm::translate(model,glm::vec3(0.0f, 0.0f, -1.9f));
-	model = glm::scale(model, glm::vec3(0.4f, 0.4f, 0.4f));
+	model = glm::translate(model,glm::vec3(0.0f, 0.0f, -1.0f));
+	model = glm::scale(model, glm::vec3(0.6f, 0.6f, 0.6f));
 
 	Shader shader = Shader("res/shaders/Planet.shader");
+
 	shader.UseShader();
+	shader.SetMat4x4(SHADER_UNIFORM::PROJECTION, camera.GetProjectionMatrix());
+	shader.SetVec3(SHADER_UNIFORM::ALBEDO, glm::vec3(1.0f));
+	shader.SetFloat(SHADER_UNIFORM::AO, 1.0f);
+	shader.SetFloat(SHADER_UNIFORM::METALLIC, 0.8f);
+	shader.SetFloat(SHADER_UNIFORM::ROUGHNESS, 0.8f);
+	shader.SetVec3(SHADER_UNIFORM::LIGHT_POSITIONS, glm::vec3(-2.0f, 4.0f, 0.0f));
+	shader.SetVec3(SHADER_UNIFORM::LIGHT_COLORS, glm::vec3(30.0f));
+#if ENABLE_INPUT == 0
+	shader.SetMat4x4(SHADER_UNIFORM::VIEW, camera.GetViewMatrix());
+	shader.SetVec3(SHADER_UNIFORM::CAMERA_POSITION, camera.GetPosition());
+#endif 
 
 	float lastTime = 0.0f;
 
 	/* Loop until the user closes the window */
-	while (!window.isClosing())
+	while (!window.IsClosing())
 	{
+		window.ClearColor();
+		
+		ImGui_ImplOpenGL3_NewFrame();
+		ImGui_ImplGlfw_NewFrame();
+		ImGui::NewFrame();
 
-#if ENABLE_KEY_INPUT == 1
+		shader.UseShader();
+
+#if ENABLE_INPUT == 1
 		float now = window.getCurrentTime();
 		float deltaTime = now - lastTime;
 		lastTime = now;
 		inputManager->updateKeyInput(deltaTime);
+		shader.SetVec3(SHADER_UNIFORM::CAMERA_POSITION, camera.getPosition());
+		shader.SetMat4x4(SHADER_UNIFORM::VIEW, camera.GetViewMatrix());
 #endif 
-
-		window.clearColor();
-
-		shader.SetModelMatrix(model);
-		shader.SetViewMatrix(camera.GetViewMatrix());
-		shader.SetProjectionMatrix(camera.GetProjectionMatrix());
 		
+		model = glm::rotate(model, glm::radians(0.2f), glm::vec3(0.8f, 1.0f, 0.0f));
+		shader.SetMat4x4(SHADER_UNIFORM::MODEL, model);
+		
+
 		for (int i = 0; i < faces.size(); i++)
 		{
-			faces[i].draw();
+			faces[i].Draw();
 		}
 
-		window.swapBuffers();
+		{
+			ImGui::Begin("FPS COUNTER");                        
+			ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
+			ImGui::End();
+		}
+
+		ImGui::Render();
+		ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());//SLowwwww
+		
+		window.SwapBuffers();
 	}
 
 	return 0;

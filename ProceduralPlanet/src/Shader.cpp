@@ -54,18 +54,32 @@ Shader::Shader(const char* filepath)
 	GLCall(glValidateProgram(shaderProgramID));
 
 	//Note: get and save the uniformIDs here
-	projectionUniformID = glGetUniformLocation(shaderProgramID, "projectionMatrix");
-	viewUniformID = glGetUniformLocation(shaderProgramID, "viewMatrix");
-	modelUniformID = glGetUniformLocation(shaderProgramID, "modelMatrix");
+	AddUniformID(SHADER_UNIFORM::PROJECTION, "u_projectionMatrix");
+	AddUniformID(SHADER_UNIFORM::VIEW, "u_viewMatrix");
+	AddUniformID(SHADER_UNIFORM::MODEL, "u_modelMatrix");
+	AddUniformID(SHADER_UNIFORM::ALBEDO, "u_albedo");
+	AddUniformID(SHADER_UNIFORM::METALLIC, "u_metallic");
+	AddUniformID(SHADER_UNIFORM::ROUGHNESS, "u_roughness");
+	AddUniformID(SHADER_UNIFORM::AO, "u_ao");
+	AddUniformID(SHADER_UNIFORM::LIGHT_POSITIONS, "u_lightPositions[0]");
+	AddUniformID(SHADER_UNIFORM::LIGHT_COLORS, "u_lightColors[0]");
+	AddUniformID(SHADER_UNIFORM::CAMERA_POSITION, "u_camPos");
 
 	GLCall(glDeleteShader(vertexShaderID));
 	GLCall(glDeleteShader(fragmentShaderID));
 }
 
-Shader::~Shader()
+void Shader::AddUniformID(SHADER_UNIFORM uniform, const char* uniformName)
 {
-	DeleteShader();
+	unsigned int uniformID = glGetUniformLocation(shaderProgramID, uniformName);
+	if (uniformID == -1)
+	{
+		//Log::LogError("Unable to find uniform " + std::string(uniformName));
+	}
+	uniformIDs.insert(std::pair<SHADER_UNIFORM, unsigned int>(uniform, uniformID));
 }
+
+
 
 unsigned int Shader::CompileShader(unsigned int type, const char* source)
 {
@@ -106,6 +120,8 @@ unsigned int Shader::CompileShader(unsigned int type, const char* source)
 	return id;
 }
 
+
+
 void Shader::UseShader()
 {
 	GLCall(glUseProgram(shaderProgramID));
@@ -116,40 +132,23 @@ void Shader::DeleteShader()
 	GLCall(glDeleteProgram(shaderProgramID));
 }
 
-void Shader::SetProjectionMatrix(glm::mat4 projection)
+void Shader::SetMat4x4(SHADER_UNIFORM uniform, glm::mat4 matrix)
 {
-	if (projectionUniformID == -1)
-	{
-		Log::LogError("Failed to get projection matrix uniform ID.");
-	}
-	else
-	{
-		glUniformMatrix4fv(projectionUniformID, 1, GL_FALSE, glm::value_ptr( projection));
-	}
-
-}
-void Shader::SetViewMatrix(glm::mat4 view)
-{
-	if (viewUniformID == -1)
-	{
-		Log::LogError("Failed to get view matrix uniform ID.");
-	}
-	else
-	{
-		glUniformMatrix4fv(viewUniformID, 1, GL_FALSE, glm::value_ptr(view));
-	}
-
-}
-void Shader::SetModelMatrix(glm::mat4 model)
-{
-	if (modelUniformID == -1)
-	{
-		Log::LogError("Failed to get model matrix uniform ID.");
-	}
-	else
-	{
-		glUniformMatrix4fv(modelUniformID, 1, GL_FALSE, glm::value_ptr(model));
-	}
-
+	glUniformMatrix4fv(uniformIDs[uniform], 1, GL_FALSE, glm::value_ptr(matrix));
 }
 
+void Shader::SetVec3(SHADER_UNIFORM uniform, glm::vec3 vector)
+{
+	glUniform3fv(uniformIDs[uniform], 1, &vector[0]);
+}
+
+void Shader::SetFloat(SHADER_UNIFORM uniform, float value)
+{
+	glUniform1f(uniformIDs[uniform], value);
+}
+
+
+Shader::~Shader()
+{
+	DeleteShader();
+}

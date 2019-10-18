@@ -2,12 +2,12 @@
 
 Noise::Noise()
 {
-	randomize(0);
+	Randomize(0);
 }
 
 Noise::Noise(int seed)
 {
-	randomize(seed);
+	Randomize(seed);
 }
 
 float Noise::evaluate(glm::vec3 point)
@@ -22,9 +22,9 @@ float Noise::evaluate(glm::vec3 point)
 	double s = (x + y + z) * F3;
 
 	// for 3D
-	int i = fastFloor(x + s);
-	int j = fastFloor(y + s);
-	int k = fastFloor(z + s);
+	int i = FastFloor(x + s);
+	int j = FastFloor(y + s);
+	int k = FastFloor(z + s);
 
 	double t = (i + j + k) * G3;
 
@@ -141,7 +141,7 @@ float Noise::evaluate(glm::vec3 point)
 	{
 		t0 *= t0;
 		int gi0 = _random[ii + _random[jj + _random[kk]]] % 12;
-		n0 = t0 * t0 * dot(Grad3[gi0], x0, y0, z0);
+		n0 = t0 * t0 * Dot(Grad3[gi0], x0, y0, z0);
 	}
 
 	double t1 = 0.6 - x1 * x1 - y1 * y1 - z1 * z1;
@@ -149,7 +149,7 @@ float Noise::evaluate(glm::vec3 point)
 	{
 		t1 *= t1;
 		int gi1 = _random[ii + i1 + _random[jj + j1 + _random[kk + k1]]] % 12;
-		n1 = t1 * t1 * dot(Grad3[gi1], x1, y1, z1);
+		n1 = t1 * t1 * Dot(Grad3[gi1], x1, y1, z1);
 	}
 
 	double t2 = 0.6 - x2 * x2 - y2 * y2 - z2 * z2;
@@ -157,7 +157,7 @@ float Noise::evaluate(glm::vec3 point)
 	{
 		t2 *= t2;
 		int gi2 = _random[ii + i2 + _random[jj + j2 + _random[kk + k2]]] % 12;
-		n2 = t2 * t2 * dot(Grad3[gi2], x2, y2, z2);
+		n2 = t2 * t2 * Dot(Grad3[gi2], x2, y2, z2);
 	}
 
 	double t3 = 0.6 - x3 * x3 - y3 * y3 - z3 * z3;
@@ -165,7 +165,7 @@ float Noise::evaluate(glm::vec3 point)
 	{
 		t3 *= t3;
 		int gi3 = _random[ii + 1 + _random[jj + 1 + _random[kk + 1]]] % 12;
-		n3 = t3 * t3 * dot(Grad3[gi3], x3, y3, z3);
+		n3 = t3 * t3 * Dot(Grad3[gi3], x3, y3, z3);
 	}
 
 	return (float)(n0 + n1 + n2 + n3) * 32;
@@ -177,7 +177,7 @@ float Noise::evaluateNormalized(glm::vec3 point)
 	return noiseValue;
 }
 
-void Noise::randomize(int seed)
+void Noise::Randomize(int seed)
 {
 	if (seed != 0)
 	{
@@ -185,7 +185,7 @@ void Noise::randomize(int seed)
 		// Unpack the seed into 4 bytes then perform a bitwise XOR operation
 		// with each byte
 		unsigned char F[4];
-		unpackLittleUint32(seed, F);
+		UnpackLittleUint32(seed, F);
 
 		for (int i = 0; i < source.size(); i++)
 		{
@@ -205,27 +205,27 @@ void Noise::randomize(int seed)
 	}
 }
 
-double Noise::dot(std::vector<int> g, double x, double y, double z, double t)
+double Noise::Dot(std::vector<int> g, double x, double y, double z, double t)
 {
 	return g[0] * x + g[1] * y + g[2] * z + g[3] * t;
 }
 
-double Noise::dot(std::vector<int> g, double x, double y, double z)
+double Noise::Dot(std::vector<int> g, double x, double y, double z)
 {
 	return g[0] * x + g[1] * y + g[2] * z;
 }
 
-double Noise::dot(std::vector<int> g, double x, double y)
+double Noise::Dot(std::vector<int> g, double x, double y)
 {
 	return g[0] * x + g[1] * y;
 }
 
-int Noise::fastFloor(double x)
+int Noise::FastFloor(double x)
 {
 	return x >= 0 ? (int)x : (int)x - 1;
 }
 
-void Noise::unpackLittleUint32(int value, unsigned char* buffer)
+void Noise::UnpackLittleUint32(int value, unsigned char* buffer)
 {
 	buffer[0] = (unsigned char)(value & 0x00ff);
 	buffer[1] = (unsigned char)((value & 0xff00) >> 8);

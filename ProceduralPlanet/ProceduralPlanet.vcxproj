@@ -158,6 +158,12 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="src\externallibs\imgui\imgui.cpp" />
+    <ClCompile Include="src\externallibs\imgui\imgui_demo.cpp" />
+    <ClCompile Include="src\externallibs\imgui\imgui_draw.cpp" />
+    <ClCompile Include="src\externallibs\imgui\imgui_impl_glfw.cpp" />
+    <ClCompile Include="src\externallibs\imgui\imgui_impl_opengl3.cpp" />
+    <ClCompile Include="src\externallibs\imgui\imgui_widgets.cpp" />
     <ClCompile Include="src\Noise.cpp" />
     <ClCompile Include="src\PyramidTest.cpp" />
     <ClCompile Include="src\Planet.cpp" />
@@ -171,6 +177,14 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\ConfigMacros.h" />
+    <ClInclude Include="src\externallibs\imgui\imconfig.h" />
+    <ClInclude Include="src\externallibs\imgui\imgui.h" />
+    <ClInclude Include="src\externallibs\imgui\imgui_impl_glfw.h" />
+    <ClInclude Include="src\externallibs\imgui\imgui_impl_opengl3.h" />
+    <ClInclude Include="src\externallibs\imgui\imgui_internal.h" />
+    <ClInclude Include="src\externallibs\imgui\imstb_rectpack.h" />
+    <ClInclude Include="src\externallibs\imgui\imstb_textedit.h" />
+    <ClInclude Include="src\externallibs\imgui\imstb_truetype.h" />
     <ClInclude Include="src\Noise.h" />
     <ClInclude Include="src\Planet.h" />
     <ClInclude Include="src\Camera.h" />

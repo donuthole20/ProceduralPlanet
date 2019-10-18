@@ -1,25 +1,25 @@
 #include "Input.h"
 #include "InputCode.h"
 
-void Input::registerKeyInputCallback(InputListener* listener)
+void Input::RegisterKeyInputCallback(InputListener* listener)
 {
 	keyInputCallbacks.push_back(listener);
 }
-void Input::registerMousePositionInputCallback(InputListener* listener)
+void Input::RegisterMousePositionInputCallback(InputListener* listener)
 {
 	mousePositionCallbacks.push_back(listener);
 }
 
 
 
-void Input::unRegisterCallback(unsigned int ID)
+void Input::UnRegisterCallback(unsigned int ID)
 {
 	//TODO: change vector callbacks to another data type that can remove and delete
 }
 
 
 
-void Input::processKeyInput(int key, int action)
+void Input::ProcessKeyInput(int key, int action)
 {
 	if (action == PRESS)
 	{
@@ -32,19 +32,19 @@ void Input::processKeyInput(int key, int action)
 
 	for (int i = 0; i < keyInputCallbacks.size(); i++)
 	{
-		keyInputCallbacks[i]->handleKeyInput(key, action);
+		keyInputCallbacks[i]->HandleKeyInput(key, action);
 	}
 }
 
-void Input::processCursorPosition(float xpos, float ypos)
+void Input::ProcessCursorPosition(float xpos, float ypos)
 {
 	for (int i = 0; i < mousePositionCallbacks.size(); i++)
 	{
-		mousePositionCallbacks[i]->handleMousePositionInput(xpos, ypos);
+		mousePositionCallbacks[i]->HandleMousePositionInput(xpos, ypos);
 	}
 }
 
-void Input::updateKeyInput(float deltaTime)
+void Input::UpdateKeyInput(float deltaTime)
 {
 	if (keyPressedCount < 1)
 	{
@@ -53,7 +53,7 @@ void Input::updateKeyInput(float deltaTime)
 
 	for (size_t i = 0; i < keyInputCallbacks.size(); i++)
 	{
-		keyInputCallbacks[i]->handleKeyInputUpdate(deltaTime);
+		keyInputCallbacks[i]->HandleKeyInputUpdate(deltaTime);
 	}
 }
 

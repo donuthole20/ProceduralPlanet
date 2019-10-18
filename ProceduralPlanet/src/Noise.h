@@ -53,12 +53,12 @@ private:
 		{0, -1, 1}, {0, 1, -1}, {0, -1, -1}
 	};
 
-	void randomize(int seed);
-	double dot(std::vector<int> g, double x, double y, double z, double t);
-	double dot(std::vector<int> g, double x, double y, double z);
-	double dot(std::vector<int> g, double x, double y);
-	int fastFloor(double x);
-	void unpackLittleUint32(int value, unsigned char* buffer);
+	void Randomize(int seed);
+	double Dot(std::vector<int> g, double x, double y, double z, double t);
+	double Dot(std::vector<int> g, double x, double y, double z);
+	double Dot(std::vector<int> g, double x, double y);
+	int FastFloor(double x);
+	void UnpackLittleUint32(int value, unsigned char* buffer);
 
 
 };

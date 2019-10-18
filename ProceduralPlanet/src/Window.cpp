@@ -2,6 +2,13 @@
 
 #include "Log.h"
 
+
+
+#include "externallibs/imgui/imgui.h"
+#include "externallibs/imgui/imgui_impl_glfw.h"
+#include "externallibs/imgui/imgui_impl_opengl3.h"
+
+
 //Input Window::inputManager = Input();
 
 Window::Window()
@@ -46,17 +53,34 @@ Window::Window(int height, int width)
 
 	inputManager = Input();
 
-	glfwSetKeyCallback(window, keyInput_Callback);
-	glfwSetCursorPosCallback(window,cursor_position_callback);
+	glfwSetKeyCallback(window, KeyInput_Callback);
+	glfwSetCursorPosCallback(window,Cursor_position_callback);
 	//glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+
+
+	// Setup Dear ImGui context
+	IMGUI_CHECKVERSION();
+	ImGui::CreateContext();
+	ImGuiIO& io = ImGui::GetIO(); (void)io;
+	//io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;     // Enable Keyboard Controls
+	//io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;      // Enable Gamepad Controls
+
+	// Setup Dear ImGui style
+	ImGui::StyleColorsDark();
+	//ImGui::StyleColorsClassic();
+
+	// Setup Platform/Renderer bindings
+	ImGui_ImplGlfw_InitForOpenGL(window, true);
+	ImGui_ImplOpenGL3_Init();
+
 }
 
-Input* Window::getInputManger()
+Input* Window::GetInputManger()
 {
 	return &inputManager;
 }
 
-void Window::keyInput_Callback(GLFWwindow* window, int key, int scancode, int action, int mods)
+void Window::KeyInput_Callback(GLFWwindow* window, int key, int scancode, int action, int mods)
 {
 	Window* callbackWindow = static_cast<Window*>(glfwGetWindowUserPointer(window));
 	if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
@@ -64,11 +88,11 @@ void Window::keyInput_Callback(GLFWwindow* window, int key, int scancode, int ac
 		glfwSetWindowShouldClose(window, GLFW_TRUE);
 	}
 
-	callbackWindow->getInputManger()->processKeyInput(key, action);
+	callbackWindow->GetInputManger()->ProcessKeyInput(key, action);
 		
 }
 
-void Window::cursor_position_callback(GLFWwindow* window, double xpos, double ypos)
+void Window::Cursor_position_callback(GLFWwindow* window, double xpos, double ypos)
 {
 	Window* callbackWindow = static_cast<Window*>(glfwGetWindowUserPointer(window));
 
@@ -85,16 +109,16 @@ void Window::cursor_position_callback(GLFWwindow* window, double xpos, double yp
 	callbackWindow->lastX = (float)xpos;
 	callbackWindow->lastY = (float)ypos;
 
-	callbackWindow->getInputManger()->processCursorPosition(callbackWindow->xChange, callbackWindow->yChange);
+	callbackWindow->GetInputManger()->ProcessCursorPosition(callbackWindow->xChange, callbackWindow->yChange);
 }
 
-void Window::clearColor()
+void Window::ClearColor()
 {
 	/* Render here */
 	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 }
-void Window::swapBuffers()
+void Window::SwapBuffers()
 {
 	/* Swap front and back buffers */
 	glfwSwapBuffers(window);
@@ -103,17 +127,21 @@ void Window::swapBuffers()
 	glfwPollEvents();
 }
 
-bool Window::isClosing()
+bool Window::IsClosing()
 {
 	return glfwWindowShouldClose(window);
 }
-void Window::closeWindow()
+void Window::CloseWindow()
 {
+	ImGui_ImplOpenGL3_Shutdown();
+	ImGui_ImplGlfw_Shutdown();
+	ImGui::DestroyContext();
+
 	glfwDestroyWindow(window);
 	glfwTerminate();
 }
 
 Window::~Window()
 {
-	closeWindow();
+	CloseWindow();
 }

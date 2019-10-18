@@ -1,5 +1,6 @@
 #include "Camera.h"
 #include "InputCode.h"
+#include <iostream>
 
 #define W_KEY_BIT_LOCATION  (1 << 0)
 #define S_KEY_BIT_LOCATION  (1 << 1)
@@ -8,20 +9,20 @@
 
 Camera::Camera(float fieldOfView, float aspectRatio, float nearPlane, float farPlane):
 	projectionMatrix(glm::perspective(fieldOfView, aspectRatio, nearPlane, farPlane)),
-	position(glm::vec3(0.0f)),
+	position(glm::vec3(0.0f,0.0f,2.0f)),
 	front(glm::vec3(0.0f, 0.0f, -1.0f)),
 	up(glm::vec3(0.0f)),
 	right(glm::vec3(0.0f)),
 	worldUp(glm::vec3(0.0f, 1.0f, 0.0f)),
-	yaw(0.0f),
+	yaw(270.0f),
 	pitch(0.0f),
 	movementSpeed(1),
-	turnSpeed(0.5f),
+	turnSpeed(0.05f),
 	keyMap(0)
 {
-	calculateDirectionVectors();
+	CalculateDirectionVectors();
 }
-void Camera::calculateDirectionVectors()
+void Camera::CalculateDirectionVectors()
 {
 	front.x = cos(glm::radians(yaw)) * cos(glm::radians(pitch));
 	front.y = sin(glm::radians(pitch));
@@ -43,7 +44,7 @@ glm::mat4 Camera::GetViewMatrix()
 	return glm::lookAt(position,position+front,worldUp);
 }
 
-void Camera::handleKeyInput(int key,int action)//TODO make smooth
+void Camera::HandleKeyInput(int key,int action)//TODO make smooth
 {
 	unsigned char bitLocation =0;
 
@@ -77,7 +78,7 @@ void Camera::handleKeyInput(int key,int action)//TODO make smooth
 
 }
 
-void Camera::handleMousePositionInput(float xChange, float yChange)
+void Camera::HandleMousePositionInput(float xChange, float yChange)
 {
 	yaw += xChange * turnSpeed;
 	pitch += yChange * turnSpeed;
@@ -85,10 +86,12 @@ void Camera::handleMousePositionInput(float xChange, float yChange)
 	pitch = glm::min(pitch, 89.0f);
 	pitch = glm::max(pitch, -89.0f);
 
-	calculateDirectionVectors();
+	std::cout << pitch <<"\n";
+
+	CalculateDirectionVectors();
 }
 
-void Camera::handleKeyInputUpdate(float deltaTime)
+void Camera::HandleKeyInputUpdate(float deltaTime)
 {
 	float velocity = movementSpeed * deltaTime;
 	if (keyMap & W_KEY_BIT_LOCATION)

@@ -5,9 +5,9 @@
 class InputListener
 {
 public:
-	virtual void handleKeyInput(int key, int action) = 0;
-	virtual void handleMousePositionInput(float xChange, float yChange) = 0;
-	virtual void handleKeyInputUpdate(float deltaTime) =0;
+	virtual void HandleKeyInput(int key, int action) = 0;
+	virtual void HandleMousePositionInput(float xChange, float yChange) = 0;
+	virtual void HandleKeyInputUpdate(float deltaTime) =0;
 };
 
 
@@ -19,11 +19,11 @@ private:
 	std::vector<InputListener*> mousePositionCallbacks;
 	int keyPressedCount;
 public:
-	void registerKeyInputCallback(InputListener* listener);
-	void registerMousePositionInputCallback(InputListener* listener);
-	void unRegisterCallback(unsigned int ID);
-	void processKeyInput(int key, int action);
-	void processCursorPosition(float xpos, float ypos);
-	void updateKeyInput(float deltaTime);
+	void RegisterKeyInputCallback(InputListener* listener);
+	void RegisterMousePositionInputCallback(InputListener* listener);
+	void UnRegisterCallback(unsigned int ID);
+	void ProcessKeyInput(int key, int action);
+	void ProcessCursorPosition(float xpos, float ypos);
+	void UpdateKeyInput(float deltaTime);
 };
 

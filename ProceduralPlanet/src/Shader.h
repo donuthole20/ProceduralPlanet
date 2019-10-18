@@ -1,5 +1,21 @@
 #pragma once
 #include <glm.hpp>
+#include <map>
+
+
+enum class SHADER_UNIFORM
+{
+	PROJECTION,
+	VIEW,
+	MODEL,
+	ALBEDO,
+	METALLIC,
+	ROUGHNESS,
+	AO,
+	LIGHT_POSITIONS,
+	LIGHT_COLORS,
+	CAMERA_POSITION
+};
 
 class Shader
 {
@@ -7,16 +23,17 @@ private:
 	Shader();
 	unsigned int shaderProgramID;
 	unsigned int CompileShader(unsigned int type, const char* source);
-	unsigned int projectionUniformID;
-	unsigned int viewUniformID;
-	unsigned int modelUniformID;
+	std::map<SHADER_UNIFORM, unsigned int> uniformIDs;
+
+	void AddUniformID(SHADER_UNIFORM uniform, const char* uniformName);
 public:
 	~Shader();
 	Shader(const char* filepath);
 	void UseShader();
 	void DeleteShader();
-	void SetProjectionMatrix(glm::mat4 projection);
-	void SetViewMatrix(glm::mat4 view);
-	void SetModelMatrix(glm::mat4 model);
+	void SetMat4x4(SHADER_UNIFORM uniform, glm::mat4 matrix);
+	void SetVec3(SHADER_UNIFORM uniform, glm::vec3 vector);
+	void SetFloat(SHADER_UNIFORM uniform, float value);
+
 };
 

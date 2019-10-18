@@ -14,18 +14,18 @@ private:
 	bool mouseFirstMoved;
 	Input inputManager;
 
-	static void keyInput_Callback(GLFWwindow* window, int key, int scancode, int action, int mods);
-	static void cursor_position_callback(GLFWwindow* window, double xpos, double ypos);
+	static void KeyInput_Callback(GLFWwindow* window, int key, int scancode, int action, int mods);
+	static void Cursor_position_callback(GLFWwindow* window, double xpos, double ypos);
 public:
 	Window();
 	Window(int height, int width);
-	float getCurrentTime() { return (float)glfwGetTime(); };
-	Input* getInputManger();
-	float getAspectRatio() { return aspectRatio; };
-	void clearColor();
-	void swapBuffers();
-	bool isClosing();
-	void closeWindow();
+	float GetCurrentTime() { return (float)glfwGetTime(); };
+	Input* GetInputManger();
+	float GetAspectRatio() { return aspectRatio; };
+	void ClearColor();
+	void SwapBuffers();
+	bool IsClosing();
+	void CloseWindow();
 	~Window();
 };
 

@@ -12,10 +12,10 @@ TerrainFace::TerrainFace(size_t resolution)
 //#include <iostream>
 TerrainFace::~TerrainFace()
 {
-	deleteFromGPU();
+	DeleteFromGPU();
 }
 
-void TerrainFace::createMesh(glm::vec3* localUp, Noise* noise, std::vector<INoiseSettings*>* noiseSettings)
+void TerrainFace::CreateMesh(glm::vec3* localUp, Noise* noise, std::vector<INoiseSettings*>* noiseSettings)
 {
 	
 	glm::vec3 axisA = glm::vec3(localUp->y, localUp->z, localUp->x);
@@ -30,7 +30,7 @@ void TerrainFace::createMesh(glm::vec3* localUp, Noise* noise, std::vector<INois
 	{
 		for (size_t x = 0; x < resolution; x++)
 		{
-			size_t i = x + y * resolution;
+			unsigned int i = x + y * resolution;
 			glm::vec2 percent = glm::vec2(x, y);
 			percent /= (resolution - 1);
 			glm::vec3 pointOnUnitCube = *localUp + (percent.x - 0.5f) * 2 * axisA + (percent.y - 0.5f) * 2 * axisB;
@@ -39,7 +39,7 @@ void TerrainFace::createMesh(glm::vec3* localUp, Noise* noise, std::vector<INois
 			float firstLayerValue = 0;
 			for (size_t noiseFilterIndex = 0; noiseFilterIndex < noiseFiltersSettings.size(); noiseFilterIndex++)
 			{
-				float noiseAmount = noiseFiltersSettings[noiseFilterIndex]->evaluate(noise,pointOnUnitSphere);
+				float noiseAmount = noiseFiltersSettings[noiseFilterIndex]->Evaluate(noise,pointOnUnitSphere);
 				if( noiseFilterIndex ==0)
 				{
 					firstLayerValue = noiseAmount;
@@ -68,10 +68,10 @@ void TerrainFace::createMesh(glm::vec3* localUp, Noise* noise, std::vector<INois
 			}
 		}
 	}
-	calculateAverageNormals();
+	CalculateAverageNormals();
 }
 
-void TerrainFace::bindToGPU()
+void TerrainFace::BindToGPU()
 {
 	GLCall(glGenVertexArrays(1, &vertexArrayObjectID));
 	GLCall(glBindVertexArray(vertexArrayObjectID));
@@ -100,21 +100,21 @@ void TerrainFace::bindToGPU()
 
 
 
-void TerrainFace::draw()
+void TerrainFace::Draw()
 {
 	GLCall(glBindVertexArray(vertexArrayObjectID));
 	GLCall(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indexBufferID));
 	GLCall(glDrawElements(GL_TRIANGLES, triCount, GL_UNSIGNED_INT, nullptr));
 }
 
-void TerrainFace::deleteFromGPU()
+void TerrainFace::DeleteFromGPU()
 {
 	GLCall(glDeleteVertexArrays(1,&vertexArrayObjectID));
 	GLCall(glDeleteBuffers(1,&vertexBufferID));
 	GLCall(glDeleteBuffers(1, &indexBufferID));
 }
 
-void TerrainFace::calculateAverageNormals()//TODO: Refactor, 
+void TerrainFace::CalculateAverageNormals()//TODO: Refactor, 
 {
 	std::vector<glm::vec3> normals(positions.size(),glm::vec3(0.0f));
 	for (size_t i = 0; i < indices.size(); i+=3)

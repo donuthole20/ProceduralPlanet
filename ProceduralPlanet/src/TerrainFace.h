@@ -17,14 +17,14 @@ public:
 	float persistence = 0.5f;
 	glm::vec3 center;
 	float minValue = 1.0f;
-	virtual float evaluate(Noise* noise, glm::vec3 point) = 0;
+	virtual float Evaluate(Noise* noise, glm::vec3 point) = 0;
 };
 
 class RigidNoiseSettings :public INoiseSettings
 {
 public:
 	float weightMultiplier = 0.8f;
-	float evaluate(Noise* noise, glm::vec3 point)
+	float Evaluate(Noise* noise, glm::vec3 point)
 	{
 		float noiseAmount = 0;
 		float frequency = baseRoughness;
@@ -51,7 +51,7 @@ public:
 class SimpleNoiseSettings :public INoiseSettings
 {
 public:
-	float evaluate(Noise* noise, glm::vec3 point)
+	float Evaluate(Noise* noise, glm::vec3 point)
 	{
 		float noiseAmount = 0;
 		float frequency = baseRoughness;
@@ -84,13 +84,13 @@ class TerrainFace
 		std::vector<unsigned int> indices;
 		std::vector<glm::vec3> normals;
 
+		void CalculateAverageNormals();
 	public:
 		~TerrainFace();
 		TerrainFace(size_t resolution);
-		void createMesh(glm::vec3* localUp, Noise* noise, std::vector<INoiseSettings*>* noiseSettings);
-		void bindToGPU();
-		void draw();
-		void deleteFromGPU();
-		void calculateAverageNormals();
+		void CreateMesh(glm::vec3* localUp, Noise* noise, std::vector<INoiseSettings*>* noiseSettings);
+		void BindToGPU();
+		void Draw();
+		void DeleteFromGPU();
 };
 

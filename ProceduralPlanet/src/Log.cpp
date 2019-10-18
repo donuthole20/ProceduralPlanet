@@ -10,7 +10,7 @@ void Log::LogDebug(const char* log)
 #endif
 }
 
-void Log::LogError(const char* error)
+void Log::LogError(std::string error)
 {
 #if ENABLE_LOG == 1
 	std::cout << __FILE__ << ":" << __LINE__ << " Error: " << error <<"\n";
