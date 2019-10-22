@@ -74,7 +74,7 @@ void Shader::AddUniformID(SHADER_UNIFORM uniform, const char* uniformName)
 	unsigned int uniformID = glGetUniformLocation(shaderProgramID, uniformName);
 	if (uniformID == -1)
 	{
-		//Log::LogError("Unable to find uniform " + std::string(uniformName));
+		Log::LogError("Unable to find uniform " + std::string(uniformName),false);
 	}
 	uniformIDs.insert(std::pair<SHADER_UNIFORM, unsigned int>(uniform, uniformID));
 }

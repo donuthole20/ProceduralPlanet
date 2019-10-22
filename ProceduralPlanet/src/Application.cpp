@@ -16,6 +16,7 @@
 #include "Input.h"
 #include "PyramidTest.h"
 #include "Noise.h"
+#include "Planet.h"
 
 
 #include "externallibs/imgui/imgui.h"
@@ -32,91 +33,44 @@ int main(void)
 	Window window = Window(1366, 768);
 
 	
-	std::vector<TerrainFace> faces;
-	faces.reserve(6);
 	size_t resolution = 50;
 
-	{
-		Noise noise;
-		std::vector<INoiseSettings*> noiseSettings;
+	std::vector<INoiseSettings*> noiseSettings;
 
-		SimpleNoiseSettings settings1;
-		settings1.strength = 0.15f;
-		settings1.numberOfLayers = 4;
-		settings1.baseRoughness = 1.15f;
-		settings1.roughness = 2.2f;
-		settings1.persistence = 0.5f;
-		settings1.center = glm::vec3(1.11f,0.92f,-0.39f);
-		settings1.minValue = 0.98f;
-		noiseSettings.push_back(&settings1);
+	SimpleNoiseSettings settings1;
+	settings1.strength = 0.15f;
+	settings1.numberOfLayers = 4;
+	settings1.baseRoughness = 1.15f;
+	settings1.roughness = 2.2f;
+	settings1.persistence = 0.5f;
+	settings1.center = glm::vec3(1.11f,0.92f,-0.39f);
+	settings1.minValue = 0.98f;
+	noiseSettings.push_back(&settings1);
 		
-		SimpleNoiseSettings settings2;
-		settings2.strength = 0.36f;
-		settings2.numberOfLayers = 5;
-		settings2.baseRoughness = 1.08f;
-		settings2.roughness = 2.34f;
-		settings2.persistence = 0.5f;
-		settings2.center = glm::vec3(0.0f);
-		settings2.minValue = 1.25f;
-		noiseSettings.push_back(&settings2);
+	SimpleNoiseSettings settings2;
+	settings2.strength = 0.36f;
+	settings2.numberOfLayers = 5;
+	settings2.baseRoughness = 1.08f;
+	settings2.roughness = 2.34f;
+	settings2.persistence = 0.5f;
+	settings2.center = glm::vec3(0.0f);
+	settings2.minValue = 1.25f;
+	noiseSettings.push_back(&settings2);
 
-		RigidNoiseSettings settings3;
-		settings3.strength = 1.0f;
-		settings3.numberOfLayers = 4;
-		settings3.baseRoughness = 1.59f;
-		settings3.roughness = 3.3f;
-		settings3.persistence = 0.5f;
-		settings3.center = glm::vec3(0.0f);
-		settings3.minValue = 0.37f;
-		settings3.weightMultiplier = 0.78f;
-		noiseSettings.push_back(&settings3);
+	RigidNoiseSettings settings3;
+	settings3.strength = 1.0f;
+	settings3.numberOfLayers = 4;
+	settings3.baseRoughness = 1.59f;
+	settings3.roughness = 3.3f;
+	settings3.persistence = 0.5f;
+	settings3.center = glm::vec3(0.0f);
+	settings3.minValue = 0.37f;
+	settings3.weightMultiplier = 0.78f;
+	noiseSettings.push_back(&settings3);
+
+	Planet planet;
+	planet.CreatePlanet(&resolution, &noiseSettings);
 		
-
-		std::vector<glm::vec3> directions;
-		directions.reserve(faces.size());
-		directions.emplace_back(0.0f, 1.0f, 0.0f);
-		directions.emplace_back(0.0f, -1.0f, 0.0f);
-		directions.emplace_back(-1.0f, 0.0f, 0.0f);
-		directions.emplace_back(1.0f, 0.0f, 0.0f);
-		directions.emplace_back(0.0f, 0.0f, 1.0f);
-		directions.emplace_back(0.0f, 0.0f, -1.0f);
-		
-
-#if THREADED == 1
-		//threaded
-		std::vector<std::thread> workers;
-		workers.reserve(faces.size());
-		for (int i = 0; i < directions.size(); i++)
-		{
-			faces.emplace_back(resolution);
-			workers.emplace_back([&faces,i, &directions, &noise, &noiseSettings] {
-				faces[i].CreateMesh(&directions[i], &noise, &noiseSettings);
-				});
-		}
-
-		for (int i = 0; i < workers.size(); i++)
-		{
-			workers[i].join();
-			faces[i].BindToGPU();
-		}
-
-		workers.clear();
-
-#else
-		//Not threaded
-		for (int i = 0; i < directions.size(); i++)
-		{
-			faces.emplace_back(resolution);
-			faces[i].createMesh(&directions[i], &noise, &noiseSettings);
-			faces[i].calculateAverageNormals();
-			faces[i].bindToGPU();
-
-		}
-		
-#endif 
-		noiseSettings.clear();
-		directions.clear();
-	}
 
 	Camera camera = Camera(45.0f, window.GetAspectRatio(), 0.01f, 100.0f);
 	Input* inputManager = window.GetInputManger();
@@ -145,7 +99,6 @@ int main(void)
 #endif 
 
 	float lastTime = 0.0f;
-
 	/* Loop until the user closes the window */
 	while (!window.IsClosing())
 	{
@@ -168,21 +121,32 @@ int main(void)
 		
 		model = glm::rotate(model, glm::radians(0.2f), glm::vec3(0.8f, 1.0f, 0.0f));
 		shader.SetMat4x4(SHADER_UNIFORM::MODEL, model);
-		
 
-		for (int i = 0; i < faces.size(); i++)
-		{
-			faces[i].Draw();
-		}
+
 
 		{
 			ImGui::Begin("FPS COUNTER");                        
 			ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
+			static int f = resolution;
+			if (ImGui::Button("Generate"))
+			{
+				if (resolution != f)
+				{
+					resolution = f;
+					planet.CreatePlanet(&resolution, &noiseSettings);
+				}
+			}
+			ImGui::SliderInt("Resolution", &f, 2, 1000);
+		
 			ImGui::End();
 		}
 
+
 		ImGui::Render();
 		ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());//SLowwwww
+
+		planet.Draw();
+
 		
 		window.SwapBuffers();
 	}

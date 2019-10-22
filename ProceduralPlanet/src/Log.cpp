@@ -10,11 +10,14 @@ void Log::LogDebug(const char* log)
 #endif
 }
 
-void Log::LogError(std::string error)
+void Log::LogError(std::string error , bool willTriggerBreakPoint)
 {
 #if ENABLE_LOG == 1
 	std::cout << __FILE__ << ":" << __LINE__ << " Error: " << error <<"\n";
-	__debugbreak();
+	if (willTriggerBreakPoint)
+	{
+		__debugbreak();
+	}
 #endif
 }
 

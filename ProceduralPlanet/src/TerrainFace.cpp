@@ -2,6 +2,7 @@
 #include <vector>
 
 #include "OpenGLErrorHandler.h"
+#include "Log.h"
 
 TerrainFace::TerrainFace(size_t resolution)
 :resolution(glm::min(glm::abs((int)resolution), 250))//TODO max resolution to take into acount max capacity of vector
@@ -12,7 +13,7 @@ TerrainFace::TerrainFace(size_t resolution)
 //#include <iostream>
 TerrainFace::~TerrainFace()
 {
-	DeleteFromGPU();
+	//DeleteFromGPU();
 }
 
 void TerrainFace::CreateMesh(glm::vec3* localUp, Noise* noise, std::vector<INoiseSettings*>* noiseSettings)
@@ -95,6 +96,7 @@ void TerrainFace::BindToGPU()
 	GLCall(glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(unsigned int) * indices.size(), &indices[0], GL_STATIC_DRAW));
 
 	GLCall(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0));
+
 	indices.clear();
 }
 
@@ -139,7 +141,9 @@ void TerrainFace::CalculateAverageNormals()//TODO: Refactor,
 		normals[i] = normalize(normals[i]);
 		normalVector.emplace_back(positions[i]);
 		normalVector.emplace_back(normalize(normals[i]));
+		
 	}
+	
 	positions.clear();
 	positions = normalVector;
 }
