@@ -56,6 +56,8 @@ Window::Window(int height, int width)
 	glfwSetKeyCallback(window, KeyInput_Callback);
 	glfwSetCursorPosCallback(window,Cursor_position_callback);
 	//glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+	glfwSetFramebufferSizeCallback(window, Framebuffer_size_callback);
+
 
 
 	// Setup Dear ImGui context
@@ -110,6 +112,22 @@ void Window::Cursor_position_callback(GLFWwindow* window, double xpos, double yp
 	callbackWindow->lastY = (float)ypos;
 
 	callbackWindow->GetInputManger()->ProcessCursorPosition(callbackWindow->xChange, callbackWindow->yChange);
+}
+
+void Window::Framebuffer_size_callback(GLFWwindow* window, int width, int height)
+{
+	glViewport(0, 0, width, height);
+	Window* callbackWindow = static_cast<Window*>(glfwGetWindowUserPointer(window));
+	callbackWindow->UpdateAspectRatio();
+
+}
+
+void Window::UpdateAspectRatio()
+{
+	int bufferWidth, bufferHeight;
+	glfwGetFramebufferSize(window, &bufferWidth, &bufferHeight);
+	aspectRatio = (float)bufferWidth / (float)bufferHeight;
+	currentCamera->SetAspectRatio(aspectRatio);
 }
 
 void Window::ClearColor()

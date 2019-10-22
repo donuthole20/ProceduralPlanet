@@ -2,14 +2,12 @@
 #include <iostream>
 #include <GL/glew.h>
 #include <stdio.h>
-
-
-#define GL_ENABLE_ERROR_CHECK 0//Note: Enabling this is slow
+#include "ConfigMacros.h"
 
 #define ASSERT(x) if(!(x)) __debugbreak();
 
 #if GL_ENABLE_ERROR_CHECK == 1
-#define GLCall(x) GLClearError();\
+#define GLCall(x)\
 		x;\
 		ASSERT(GLLogCall())
 #else
@@ -28,7 +26,6 @@ static bool  GLLogCall()
 {
 	while (GLenum error = glGetError())
 	{
-		printf("[OpenGL Error] (%s)\n", error);
 		std::cout << "[OpenGL Error] (" << error << ")\n";
 		return false;
 	}

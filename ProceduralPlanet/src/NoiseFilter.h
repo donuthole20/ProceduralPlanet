@@ -2,6 +2,11 @@
 
 #include "Noise.h"
 
+enum NoiseType
+{
+	Simple, 
+	Rigid
+};
 class INoiseSettings
 {
 public:
@@ -12,12 +17,17 @@ public:
 	float persistence = 0.5f;
 	glm::vec3 center;
 	float minValue = 1.0f;
+	NoiseType type;
 	virtual float Evaluate(Noise* noise, glm::vec3 point) = 0;
 };
 
 class RigidNoiseSettings :public INoiseSettings
 {
 public:
+	RigidNoiseSettings()
+	{
+		type = NoiseType::Rigid;
+	}
 	float weightMultiplier = 0.8f;
 	float Evaluate(Noise* noise, glm::vec3 point)
 	{
@@ -46,6 +56,10 @@ public:
 class SimpleNoiseSettings :public INoiseSettings
 {
 public:
+	SimpleNoiseSettings()
+	{
+		type = NoiseType::Simple;
+	}
 	float Evaluate(Noise* noise, glm::vec3 point)
 	{
 		float noiseAmount = 0;

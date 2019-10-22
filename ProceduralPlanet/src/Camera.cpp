@@ -8,6 +8,9 @@
 #define D_KEY_BIT_LOCATION  (1 << 3)
 
 Camera::Camera(float fieldOfView, float aspectRatio, float nearPlane, float farPlane):
+	fieldOfView(fieldOfView),
+	nearPlane(nearPlane),
+	farPlane(farPlane),
 	projectionMatrix(glm::perspective(fieldOfView, aspectRatio, nearPlane, farPlane)),
 	position(glm::vec3(0.0f,0.0f,2.0f)),
 	front(glm::vec3(0.0f, 0.0f, -1.0f)),
@@ -44,7 +47,7 @@ glm::mat4 Camera::GetViewMatrix()
 	return glm::lookAt(position,position+front,worldUp);
 }
 
-void Camera::HandleKeyInput(int key,int action)//TODO make smooth
+void Camera::HandleKeyInput(int key,int action)
 {
 	unsigned char bitLocation =0;
 
@@ -110,4 +113,31 @@ void Camera::HandleKeyInputUpdate(float deltaTime)
 	{
 		position += right * velocity;
 	}
+
+	for (size_t i = 0; i < shaderList.size(); i++)
+	{
+		shaderList[i]->UseShader();
+		shaderList[i]->SetMat4x4(SHADER_UNIFORM::VIEW, GetViewMatrix());
+		shaderList[i]->SetVec3(SHADER_UNIFORM::CAMERA_POSITION, position);
+	}
+}
+
+void Camera::SetAspectRatio(float aspectRatio)
+{
+	projectionMatrix = glm::perspective(fieldOfView, aspectRatio, nearPlane, farPlane);
+	for (size_t i = 0; i < shaderList.size(); i++)
+	{
+		shaderList[i]->UseShader();
+		shaderList[i]->SetMat4x4(SHADER_UNIFORM::PROJECTION, projectionMatrix);
+	}
+}
+
+void Camera::AddShader(Shader* shader)
+{
+	shader->UseShader();
+	shader->SetMat4x4(SHADER_UNIFORM::PROJECTION, projectionMatrix);
+	shader->SetMat4x4(SHADER_UNIFORM::VIEW, GetViewMatrix());
+	shader->SetVec3(SHADER_UNIFORM::CAMERA_POSITION, position);
+
+	shaderList.push_back(shader);
 }

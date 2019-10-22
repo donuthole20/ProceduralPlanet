@@ -3,6 +3,7 @@
 #include <vector>
 #include <glm.hpp>
 #include <gtc/matrix_transform.hpp>
+#include <future>
 #include <thread>
 
 
@@ -69,11 +70,12 @@ int main(void)
 	noiseSettings.push_back(&settings3);
 
 	Planet planet;
-	planet.CreatePlanet(&resolution, &noiseSettings);
+	planet.CreatePlanet(resolution, noiseSettings);
 		
 
 	Camera camera = Camera(45.0f, window.GetAspectRatio(), 0.01f, 100.0f);
-	Input* inputManager = window.GetInputManger();
+	Input* inputManager = window.GetInputManger();//TODO inconsistent input
+	window.SetCurrentCamera(&camera);
 #if ENABLE_INPUT == 1
 	inputManager->registerMousePositionInputCallback(&camera);
 	inputManager->registerKeyInputCallback(&camera);
@@ -84,21 +86,26 @@ int main(void)
 	model = glm::scale(model, glm::vec3(0.6f, 0.6f, 0.6f));
 
 	Shader shader = Shader("res/shaders/Planet.shader");
+	camera.AddShader(&shader);
 
 	shader.UseShader();
-	shader.SetMat4x4(SHADER_UNIFORM::PROJECTION, camera.GetProjectionMatrix());
 	shader.SetVec3(SHADER_UNIFORM::ALBEDO, glm::vec3(1.0f));
 	shader.SetFloat(SHADER_UNIFORM::AO, 1.0f);
 	shader.SetFloat(SHADER_UNIFORM::METALLIC, 0.8f);
 	shader.SetFloat(SHADER_UNIFORM::ROUGHNESS, 0.8f);
 	shader.SetVec3(SHADER_UNIFORM::LIGHT_POSITIONS, glm::vec3(-2.0f, 4.0f, 0.0f));
 	shader.SetVec3(SHADER_UNIFORM::LIGHT_COLORS, glm::vec3(30.0f));
-#if ENABLE_INPUT == 0
-	shader.SetMat4x4(SHADER_UNIFORM::VIEW, camera.GetViewMatrix());
-	shader.SetVec3(SHADER_UNIFORM::CAMERA_POSITION, camera.GetPosition());
-#endif 
+
 
 	float lastTime = 0.0f;
+
+	ImGuiWindowFlags window_flags = 0;
+	window_flags |= ImGuiWindowFlags_NoMove;
+	window_flags |= ImGuiWindowFlags_NoResize;
+	window_flags |= ImGuiWindowFlags_NoCollapse;
+
+	int counter = 0;
+	bool isContinousUpdate = false;
 	/* Loop until the user closes the window */
 	while (!window.IsClosing())
 	{
@@ -122,22 +129,53 @@ int main(void)
 		model = glm::rotate(model, glm::radians(0.2f), glm::vec3(0.8f, 1.0f, 0.0f));
 		shader.SetMat4x4(SHADER_UNIFORM::MODEL, model);
 
-
-
 		{
-			ImGui::Begin("FPS COUNTER");                        
-			ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
-			static int f = resolution;
-			if (ImGui::Button("Generate"))
+			ImGui::SetNextWindowSize(ImVec2(500, 400), ImGuiCond_FirstUseEver);
+			ImGui::Begin("Settings", NULL,window_flags);
+			if (isContinousUpdate)
 			{
-				if (resolution != f)
+				counter++;
+			}
+			ImGui::Checkbox("Continuos Update", &isContinousUpdate);
+			ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
+			if ( ImGui::Button("Generate")||(isContinousUpdate&& counter >=60))
+			{
+				planet.CreatePlanet(resolution, noiseSettings);
+				counter = 0;
+			}
+			ImGui::SliderInt("Resolution", (int*)(&resolution), 2, 1000);
+			ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
+			for (int i = 0; i < noiseSettings.size(); i++)
+			{
+				std::string index = std::to_string(i);
+				std::string noiseType;
+				switch(noiseSettings[i]->type)
 				{
-					resolution = f;
-					planet.CreatePlanet(&resolution, &noiseSettings);
+				case NoiseType::Simple:
+					noiseType = "Simple";
+					break;
+				case NoiseType::Rigid:
+					noiseType = "Rigid";
+					break;
+				}
+				
+				std::string header = noiseType + " Noise-" + index;
+				if (ImGui::CollapsingHeader(header.c_str()))
+				{
+					ImGui::SliderInt(std::string("Number of Iteration###1" + index).c_str(), (int*)&noiseSettings[i]->numberOfLayers, 1, 10);
+					ImGui::SliderFloat(std::string("Base Roughness###2" + index).c_str(), &noiseSettings[i]->baseRoughness, 0.0f, 5.0f);
+					ImGui::SliderFloat(std::string("Strength###3" + index).c_str(), &noiseSettings[i]->strength, 0.0f, 5.0f);
+					ImGui::SliderFloat(std::string("Roughness###4" + index).c_str(), &noiseSettings[i]->roughness, 0.0f, 5.0f);
+					ImGui::SliderFloat(std::string("Persistence###5" + index).c_str(), &noiseSettings[i]->persistence, 0.0f, 5.0f);
+					ImGui::SliderFloat(std::string("Min Value###6" + index).c_str(), &noiseSettings[i]->minValue, 0.0f, 5.0f);
+					ImGui::SliderFloat3(std::string("Center###7" + index).c_str(), &noiseSettings[i]->center.x, 0.0f, 10.0f);
+					if (noiseSettings[i]->type == NoiseType::Rigid)
+					{
+						ImGui::SliderFloat(std::string("Weight Multiplier###8" + index).c_str(), &((RigidNoiseSettings*)noiseSettings[i])->weightMultiplier, 0.0f, 5.0f);
+					}
 				}
 			}
-			ImGui::SliderInt("Resolution", &f, 2, 1000);
-		
+				
 			ImGui::End();
 		}
 
