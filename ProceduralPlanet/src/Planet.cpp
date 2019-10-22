@@ -1,7 +1,5 @@
 #include "Planet.h"
-#include <vector>
 #include <thread>
-#include <future>
 
 #include "OpenGLErrorHandler.h"
 #include "Log.h"
@@ -18,11 +16,24 @@ Planet::~Planet()
 	Unbind();
 }
 
+static std::mutex face_Mutex;
+static void CreateMesh(size_t resolution, std::vector<INoiseSettings*> noiseSettings, std::vector < Planet::VerticesData* >* futureData, glm::vec3 direction)
+{
+	auto face = Planet::CreatePlanetSide(resolution, noiseSettings, direction);
+
+	std::lock_guard < std::mutex > lock(face_Mutex);
+	futureData->push_back(face);
+}
+
 void Planet::CreatePlanet(size_t resolution, std::vector<INoiseSettings*> noiseSettings)
 {
-	Unbind();
-	planetSides.reserve(6);
+	std::cout << "Busy: "<< isBusy<<"\n";
 
+	if (isBusy)
+	{
+		return;
+	}
+	isBusy = true;
 	Noise noise;
 	std::vector<glm::vec3> directions;
 	directions.reserve(6);
@@ -34,20 +45,16 @@ void Planet::CreatePlanet(size_t resolution, std::vector<INoiseSettings*> noiseS
 	directions.emplace_back(0.0f, 0.0f, -1.0f);
 
 #if THREADED == 1
-	std::vector<std::future<VerticesData*>> futureData;
+	futureData.clear();
 	futureData.reserve(6);
+	futures.clear();
+	futures.reserve(6);
 	for (int i = 0; i < directions.size(); i++)
 	{
-		futureData.emplace_back(std::async(std::launch::async,[=] {
-			return CreatePlanetSide(resolution, noiseSettings, directions[i]);
-			}));
+		futures.push_back(std::async(std::launch::async,CreateMesh,resolution,noiseSettings,&futureData,directions[i]));
 	}
 
-	for (int i = 0; i < futureData.size(); i++)
-	{
-		planetSides.push_back(BindPlanetSide(futureData[i].get()));
-	}
-		
+	
 
 #else
 	//Not threaded
@@ -63,7 +70,7 @@ void Planet::CreatePlanet(size_t resolution, std::vector<INoiseSettings*> noiseS
 
 }
 
-Planet::VerticesData* Planet::CreatePlanetSide(size_t resolution, std::vector<INoiseSettings*> noiseSettings, glm::vec3 localUp)
+Planet::VerticesData* Planet::CreatePlanetSide(size_t resolution, std::vector<INoiseSettings*> noiseSettings,glm::vec3 localUp)
 {
 	Noise noise;
 	VerticesData* data = new VerticesData(resolution);
@@ -176,6 +183,20 @@ Planet::GLIDs Planet::BindPlanetSide(Planet::VerticesData* vertices)
 
 void Planet::Draw()
 {
+
+	if (futureData.size() == 6)
+	{
+		Unbind();
+		planetSides.reserve(6);
+
+		for (int i = 0; i < futureData.size(); i++)
+		{
+			planetSides.push_back(BindPlanetSide(futureData[i]));
+		}
+		futureData.clear();
+		isBusy = false;
+	}
+
 	for (int i = 0; i < planetSides.size(); i++)
 	{
 		GLCall(glBindVertexArray(planetSides[i].vertexArrayObjectID));

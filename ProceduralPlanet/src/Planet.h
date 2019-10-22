@@ -2,13 +2,14 @@
 #include <GL/glew.h>
 #include <glm.hpp>
 #include <vector>
+#include <future>
+
 
 #include "TerrainFace.h"
 
 class Planet
 {
-
-private:
+public:
 	struct VerticesData
 	{
 		std::vector<glm::vec3> vertices;
@@ -27,15 +28,17 @@ private:
 		unsigned int vertexArrayObjectID;
 		unsigned int triCount;
 	};
-
-
+private:
+	bool isBusy;
+	std::vector<VerticesData*> futureData;
+	std::vector<std::future<void>> futures;
 	std::vector<GLIDs> planetSides;
 public:
 	Planet();
 	~Planet();
 
 	void CreatePlanet(size_t resolution, std::vector<INoiseSettings*> noiseSettings);
-	VerticesData* CreatePlanetSide(size_t resolution, std::vector<INoiseSettings*> noiseSettings, glm::vec3 localUp);
+	static VerticesData* CreatePlanetSide(size_t resolution, std::vector<INoiseSettings*> noiseSettings, glm::vec3 localUp);
 	GLIDs BindPlanetSide(VerticesData* vertices);
 
 	void Draw();
