@@ -9,7 +9,7 @@
 
 class Planet
 {
-public:
+private:
 	struct VerticesData
 	{
 		std::vector<glm::vec3> vertices;
@@ -30,16 +30,19 @@ public:
 	};
 private:
 	bool isBusy;
+	std::mutex sideCreation_Mutex;
 	std::vector<VerticesData*> futureData;
 	std::vector<std::future<void>> futures;
 	std::vector<GLIDs> planetSides;
+	std::vector<glm::vec3> directions;
+
 public:
 	Planet();
 	~Planet();
 
 	void CreatePlanet(size_t resolution, std::vector<INoiseSettings*> noiseSettings);
-	static VerticesData* CreatePlanetSide(size_t resolution, std::vector<INoiseSettings*> noiseSettings, glm::vec3 localUp);
-	GLIDs BindPlanetSide(VerticesData* vertices);
+	static  VerticesData* CreatePlanetSide(size_t resolution, std::vector<INoiseSettings*> noiseSettings, glm::vec3 localUp);
+	static GLIDs BindPlanetSide(VerticesData* vertices);
 
 	void Draw();
 

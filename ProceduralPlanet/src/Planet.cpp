@@ -8,6 +8,14 @@
 Planet::Planet()
 {
 	planetSides.reserve(6);
+	directions.reserve(6);
+	directions.emplace_back(0.0f, 1.0f, 0.0f);
+	directions.emplace_back(0.0f, -1.0f, 0.0f);
+	directions.emplace_back(-1.0f, 0.0f, 0.0f);
+	directions.emplace_back(1.0f, 0.0f, 0.0f);
+	directions.emplace_back(0.0f, 0.0f, 1.0f);
+	directions.emplace_back(0.0f, 0.0f, -1.0f);
+	isBusy = false;
 }
 
 Planet::~Planet()
@@ -16,33 +24,16 @@ Planet::~Planet()
 	Unbind();
 }
 
-static std::mutex face_Mutex;
-static void CreateMesh(size_t resolution, std::vector<INoiseSettings*> noiseSettings, std::vector < Planet::VerticesData* >* futureData, glm::vec3 direction)
-{
-	auto face = Planet::CreatePlanetSide(resolution, noiseSettings, direction);
-
-	std::lock_guard < std::mutex > lock(face_Mutex);
-	futureData->push_back(face);
-}
 
 void Planet::CreatePlanet(size_t resolution, std::vector<INoiseSettings*> noiseSettings)
 {
-	std::cout << "Busy: "<< isBusy<<"\n";
-
+	
 	if (isBusy)
 	{
 		return;
 	}
+
 	isBusy = true;
-	Noise noise;
-	std::vector<glm::vec3> directions;
-	directions.reserve(6);
-	directions.emplace_back(0.0f, 1.0f, 0.0f);
-	directions.emplace_back(0.0f, -1.0f, 0.0f);
-	directions.emplace_back(-1.0f, 0.0f, 0.0f);
-	directions.emplace_back(1.0f, 0.0f, 0.0f);
-	directions.emplace_back(0.0f, 0.0f, 1.0f);
-	directions.emplace_back(0.0f, 0.0f, -1.0f);
 
 #if THREADED == 1
 	futureData.clear();
@@ -51,7 +42,15 @@ void Planet::CreatePlanet(size_t resolution, std::vector<INoiseSettings*> noiseS
 	futures.reserve(6);
 	for (int i = 0; i < directions.size(); i++)
 	{
-		futures.push_back(std::async(std::launch::async,CreateMesh,resolution,noiseSettings,&futureData,directions[i]));
+		futures.push_back(std::async(std::launch::async, [] 
+			(size_t resolution, std::vector<INoiseSettings*> settings,
+			std::vector<Planet::VerticesData*>* futureData, glm::vec3 direction, std::mutex* mutex)
+			{
+				Planet::VerticesData* face = CreatePlanetSide(resolution, settings, direction);
+				std::lock_guard < std::mutex > lock(*mutex);
+				futureData->push_back(face);
+			}, 
+			resolution, noiseSettings, &futureData, directions[i], &sideCreation_Mutex));
 	}
 
 	
@@ -183,7 +182,6 @@ Planet::GLIDs Planet::BindPlanetSide(Planet::VerticesData* vertices)
 
 void Planet::Draw()
 {
-
 	if (futureData.size() == 6)
 	{
 		Unbind();
@@ -217,12 +215,9 @@ void Planet::Unbind()
 		GLCall(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0));
 		GLCall(glBindBuffer(GL_ARRAY_BUFFER, 0));
 
-		unsigned int vao = planetSides[i].vertexArrayObjectID;
-		unsigned int vbo = planetSides[i].vertexBufferID;
-		unsigned int ibo = planetSides[i].indexBufferID;
-		GLCall(glDeleteVertexArrays(1, &vao));
-		GLCall(glDeleteBuffers(1, &vbo));
-		GLCall(glDeleteBuffers(1, &ibo));
+		GLCall(glDeleteVertexArrays(1, &planetSides[i].vertexArrayObjectID));
+		GLCall(glDeleteBuffers(1, &planetSides[i].vertexBufferID));
+		GLCall(glDeleteBuffers(1, &planetSides[i].indexBufferID));
 	}
 	planetSides.clear();
 }
