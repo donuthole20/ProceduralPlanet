@@ -3,8 +3,8 @@
 #include <GL/glew.h>
 #include <glm.hpp>
 
-#include "NoiseFilter.h"
 
+#include "NoiseFilter.h"
 
 
 class TerrainFace

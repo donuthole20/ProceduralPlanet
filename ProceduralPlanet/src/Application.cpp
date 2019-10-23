@@ -87,6 +87,7 @@ int main(void)
 
 	Shader shader = Shader("res/shaders/Planet.shader");
 	camera.AddShader(&shader);
+	planet.AddShader(&shader);
 
 	shader.UseShader();
 	shader.SetVec3(SHADER_UNIFORM::ALBEDO, glm::vec3(1.0f));
@@ -136,8 +137,13 @@ int main(void)
 			{
 				counter++;
 			}
-			ImGui::Checkbox("Continuos Update", &isContinousUpdate);
 			ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
+			ImGui::Checkbox("Continuos Update", &isContinousUpdate);
+			/*
+			static float debugShaderFloat = 0.0f;
+			ImGui::SliderFloat("Debug Float",&debugShaderFloat, 0.0f, 1.0f);
+			shader.SetFloat(SHADER_UNIFORM::DEBUG_FLOAT, debugShaderFloat);
+			*/
 			if ( ImGui::Button("Generate")||(isContinousUpdate&& counter >=60))
 			{
 				planet.CreatePlanet(resolution, noiseSettings);

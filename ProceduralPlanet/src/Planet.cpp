@@ -16,6 +16,29 @@ Planet::Planet()
 	directions.emplace_back(0.0f, 0.0f, 1.0f);
 	directions.emplace_back(0.0f, 0.0f, -1.0f);
 	isBusy = false;
+
+	std::vector<glm::lowp_u8vec3> textureData;
+	size_t height = 50;
+	size_t width = 1;
+	textureData.reserve(50);
+	for (int i = 0; i < height; i++)
+	{
+		unsigned char r =(unsigned char)glm::min((int)(i * ((255 / (height - 1)))),255);
+		unsigned char g = 0;
+		unsigned char b = 0;
+		textureData.emplace_back(r,g,b);
+	}
+	glGenTextures(1, &textureID);
+	glBindTexture(GL_TEXTURE_2D,textureID);
+
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, 1, 50, 0, GL_RGB, GL_UNSIGNED_BYTE, &textureData[0]);
+	glGenerateMipmap(GL_TEXTURE_2D);
+	glBindTexture(GL_TEXTURE_2D, 0);
 }
 
 Planet::~Planet()
@@ -35,6 +58,7 @@ void Planet::CreatePlanet(size_t resolution, std::vector<INoiseSettings*> noiseS
 
 	isBusy = true;
 
+	elevationMinMax = glm::vec2(0.0f);
 #if THREADED == 1
 	futureData.clear();
 	futureData.reserve(6);
@@ -43,14 +67,14 @@ void Planet::CreatePlanet(size_t resolution, std::vector<INoiseSettings*> noiseS
 	for (int i = 0; i < directions.size(); i++)
 	{
 		futures.push_back(std::async(std::launch::async, [] 
-			(size_t resolution, std::vector<INoiseSettings*> settings,
+			(Planet* planet, size_t resolution, std::vector<INoiseSettings*> settings,
 			std::vector<Planet::VerticesData*>* futureData, glm::vec3 direction, std::mutex* mutex)
 			{
-				Planet::VerticesData* face = CreatePlanetSide(resolution, settings, direction);
+				Planet::VerticesData* face = planet->CreatePlanetSide(resolution, settings, direction);
 				std::lock_guard < std::mutex > lock(*mutex);
 				futureData->push_back(face);
 			}, 
-			resolution, noiseSettings, &futureData, directions[i], &sideCreation_Mutex));
+			this, resolution, noiseSettings, &futureData, directions[i], &sideCreation_Mutex));
 	}
 
 	
@@ -103,8 +127,25 @@ Planet::VerticesData* Planet::CreatePlanetSide(size_t resolution, std::vector<IN
 					elevation += (noiseAmount * firstLayerValue);
 				}
 			}
-
-			data->vertices[i] = pointOnUnitSphere * (1 + elevation);
+			elevation = 1 + elevation;
+			
+			if (i==0)
+			{
+				elevationMinMax = glm::vec2(elevation);
+			}
+			else
+			{
+				if (elevation < elevationMinMax.x)
+				{
+					elevationMinMax.x = elevation;
+				}
+				if (elevation > elevationMinMax.y)
+				{
+					elevationMinMax.y = elevation;
+				}
+			}
+			
+			data->vertices[i] = pointOnUnitSphere *elevation;
 			if (x != resolution - 1 && y != resolution - 1)
 			{
 				data->indices[triIndex] = i;
@@ -192,8 +233,16 @@ void Planet::Draw()
 			planetSides.push_back(BindPlanetSide(futureData[i]));
 		}
 		futureData.clear();
+		for (size_t i = 0; i < shaders.size(); i++)
+		{
+			shaders[i]->SetVec2(SHADER_UNIFORM::ELEVATION_MIN_MAX_POSITION, elevationMinMax);
+		}
+
 		isBusy = false;
 	}
+
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, textureID);
 
 	for (int i = 0; i < planetSides.size(); i++)
 	{
@@ -203,6 +252,7 @@ void Planet::Draw()
 		GLCall(glBindVertexArray(0));
 		GLCall(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER,0));
 	}
+
 }
 
 

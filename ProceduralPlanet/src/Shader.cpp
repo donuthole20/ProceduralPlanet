@@ -54,7 +54,7 @@ Shader::Shader(const char* filepath)
 	GLCall(glValidateProgram(shaderProgramID));
 
 	//Note: get and save the uniformIDs here
-	AddUniformID(SHADER_UNIFORM::PROJECTION, "u_projectionMatrix");
+	AddUniformID(SHADER_UNIFORM::PROJECTION, "u_projectionMatrix");//TODO refactor not all shaders should have map to all uniforms
 	AddUniformID(SHADER_UNIFORM::VIEW, "u_viewMatrix");
 	AddUniformID(SHADER_UNIFORM::MODEL, "u_modelMatrix");
 	AddUniformID(SHADER_UNIFORM::ALBEDO, "u_albedo");
@@ -64,6 +64,9 @@ Shader::Shader(const char* filepath)
 	AddUniformID(SHADER_UNIFORM::LIGHT_POSITIONS, "u_lightPositions[0]");
 	AddUniformID(SHADER_UNIFORM::LIGHT_COLORS, "u_lightColors[0]");
 	AddUniformID(SHADER_UNIFORM::CAMERA_POSITION, "u_camPos");
+	AddUniformID(SHADER_UNIFORM::ELEVATION_MIN_MAX_POSITION, "u_elevationMinMax");
+	AddUniformID(SHADER_UNIFORM::DEBUG_FLOAT, "u_debugFloat");
+	
 
 	GLCall(glDeleteShader(vertexShaderID));
 	GLCall(glDeleteShader(fragmentShaderID));
@@ -135,6 +138,11 @@ void Shader::DeleteShader()
 void Shader::SetMat4x4(SHADER_UNIFORM uniform, glm::mat4 matrix)
 {
 	glUniformMatrix4fv(uniformIDs[uniform], 1, GL_FALSE, glm::value_ptr(matrix));
+}
+
+void Shader::SetVec2(SHADER_UNIFORM uniform, glm::vec2 vector)
+{
+	glUniform2fv(uniformIDs[uniform], 1, &vector[0]);
 }
 
 void Shader::SetVec3(SHADER_UNIFORM uniform, glm::vec3 vector)

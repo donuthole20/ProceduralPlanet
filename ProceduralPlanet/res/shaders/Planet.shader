@@ -19,6 +19,7 @@ void main()
 	//vCol = vec4(clamp(position,0.0f,1.0f),1.0f);
 	vCol = vec4(normal,1.0);
 	dist = distance(vec3(0.0), position.xyz);
+	//dist =	length(position);
 	//gl_Position = projectionMatrix *  modelMatrix * viewMatrix * vec4(position,1.0f);
 
 	WorldPos = vec3(u_modelMatrix * vec4(position, 1.0));
@@ -35,8 +36,14 @@ layout(location = 0) out vec4 fragColor;
 in vec3 WorldPos;
 in vec3 Normal;
 
+
 in vec4 vCol;
 in float dist;
+
+uniform vec2 u_elevationMinMax;
+uniform sampler2D texture1;
+uniform float u_debugFloat;
+
 
 // material parameters
 uniform vec3  u_albedo;
@@ -106,7 +113,7 @@ vec3 fresnelSchlick(float cosTheta, vec3 F0)
 void main()
 {
 
-	float waterMask = map(dist, 1, 1.01, 0, 0.5);
+	float waterMask = map(dist, u_elevationMinMax.x, u_elevationMinMax.y, 0, 1);
 	float mappedDist = map(dist, 1, 1.2, 0, 1 );
 
 	vec3 waterColor = vec3(0.04, 0.35, 0.76);
@@ -179,6 +186,7 @@ void main()
 	color = pow(color, vec3(1.0 / 2.2));
 
 	//fragColor = vec4(temp/);
-	fragColor = vec4(color,1.0);
+	vec2 texCoord = vec2( 0, waterMask);
+	fragColor = texture(texture1, texCoord);
 };
 

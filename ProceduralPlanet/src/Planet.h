@@ -5,7 +5,8 @@
 #include <future>
 
 
-#include "TerrainFace.h"
+#include "Shader.h"
+#include "NoiseFilter.h"
 
 class Planet
 {
@@ -35,18 +36,25 @@ private:
 	std::vector<std::future<void>> futures;
 	std::vector<GLIDs> planetSides;
 	std::vector<glm::vec3> directions;
+	glm::vec2 elevationMinMax;
+	std::vector<Shader*> shaders;
+	unsigned int textureID;//Temp
+
+
+	VerticesData* CreatePlanetSide(size_t resolution, std::vector<INoiseSettings*> noiseSettings, glm::vec3 localUp);
+	GLIDs BindPlanetSide(VerticesData* vertices);
 
 public:
+
 	Planet();
 	~Planet();
 
 	void CreatePlanet(size_t resolution, std::vector<INoiseSettings*> noiseSettings);
-	static  VerticesData* CreatePlanetSide(size_t resolution, std::vector<INoiseSettings*> noiseSettings, glm::vec3 localUp);
-	static GLIDs BindPlanetSide(VerticesData* vertices);
 
 	void Draw();
 
 	void Unbind();
+	void AddShader(Shader* shader) { shaders.push_back(shader); };
 
 };
 
