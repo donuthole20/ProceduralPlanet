@@ -112,8 +112,8 @@ vec3 fresnelSchlick(float cosTheta, vec3 F0)
 
 void main()
 {
-
-	float waterMask = map(dist, u_elevationMinMax.x, u_elevationMinMax.y, 0, 1);
+	float waterMask = map(dist, 1, 1.01, 0, 0.5);
+	float elevationNormalized = map(dist, u_elevationMinMax.x, u_elevationMinMax.y, 0, 1);
 	float mappedDist = map(dist, 1, 1.2, 0, 1 );
 
 	vec3 waterColor = vec3(0.04, 0.35, 0.76);
@@ -186,7 +186,8 @@ void main()
 	color = pow(color, vec3(1.0 / 2.2));
 
 	//fragColor = vec4(temp/);
-	vec2 texCoord = vec2( 0, waterMask);
-	fragColor = texture(texture1, texCoord);
+	vec2 texCoord = vec2(0, elevationNormalized);
+	vec4 gradient = texture(texture1, texCoord);
+	fragColor = vec4(color, 0.4);
 };
 
