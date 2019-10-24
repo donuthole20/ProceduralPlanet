@@ -28,14 +28,14 @@
 
 int main(void)
 {
+	std::cout << "size_t:" << sizeof(size_t) << " unsigned int:" << sizeof(unsigned int) << "\n";
 #ifdef RELEASE
 	ShowWindow( GetConsoleWindow(), SW_HIDE );
 #endif 
 
 	Window window = Window(1366, 768);
-
 	
-	size_t resolution = 50;
+	unsigned int resolution = 50;
 
 	std::vector<INoiseSettings*> noiseSettings;
 
@@ -164,7 +164,7 @@ int main(void)
 				counter = 0;
 			}
 			isEdited |= ImGui::SliderInt("Resolution", (int*)(&resolution), 2, 1000);
-			for (int i = 0; i < noiseSettings.size(); i++)
+			for (unsigned int i = 0; i < noiseSettings.size(); i++)
 			{
 				std::string index = std::to_string(i);
 				std::string noiseType;

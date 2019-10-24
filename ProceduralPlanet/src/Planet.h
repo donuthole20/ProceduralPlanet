@@ -17,7 +17,7 @@ private:
 	{
 		std::vector<glm::vec3> vertices;
 		std::vector<unsigned int> indices;
-		VerticesData(size_t resolution)
+		VerticesData(unsigned int resolution)
 		{
 			vertices = std::vector<glm::vec3>(resolution * resolution, glm::vec3(0, 0, 0));
 			indices = std::vector<unsigned int>(((resolution - 1) * (resolution - 1) * 6), 0);
@@ -41,11 +41,11 @@ private:
 	glm::vec2 elevationMinMax;
 	std::vector<Shader*> shaders;
 	unsigned int textureID;//Temp
-	size_t resolution;
-	size_t triCount;
+	unsigned int resolution;
+	unsigned int triCount;
 
 
-	VerticesData* CreatePlanetSide(size_t resolution, std::vector<INoiseSettings*> noiseSettings, glm::vec3 localUp);
+	VerticesData* CreatePlanetSide(unsigned int resolution, std::vector<INoiseSettings*> noiseSettings, glm::vec3 localUp);
 	GLIDs BindPlanetSide(VerticesData* vertices);
 
 public:
@@ -53,7 +53,7 @@ public:
 	Planet();
 	~Planet();
 
-	void CreatePlanet(size_t resolution, std::vector<INoiseSettings*> noiseSettings);
+	void CreatePlanet(unsigned int resolution, std::vector<INoiseSettings*> noiseSettings);
 	void SetTexture(ImGradient& gradient);
 
 	void Draw();
@@ -61,7 +61,7 @@ public:
 	void Unbind();
 	bool IsBusy() { return isBusy; };
 	void AddShader(Shader* shader) { shaders.push_back(shader); };
-	size_t GetTriCount();
+	unsigned int GetTriCount();
 
 };
 

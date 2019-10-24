@@ -13,11 +13,11 @@ class TerrainFace
 		unsigned int vertexBufferID;
 		unsigned int indexBufferID;
 		unsigned int vertexArrayObjectID;
-		unsigned int triCount;
+		size_t triCount;
 
 		size_t resolution;
 		std::vector<glm::vec3> positions;
-		std::vector<unsigned int> indices;
+		std::vector<size_t> indices;
 
 		void CalculateAverageNormals();
 	public:

@@ -8,7 +8,7 @@ TerrainFace::TerrainFace(size_t resolution)
 :resolution(glm::min(glm::abs((int)resolution), 250))//TODO max resolution to take into acount max capacity of vector
 {
 	positions = std::vector<glm::vec3>(resolution * resolution, glm::vec3(0, 0, 0));
-	indices = std::vector<unsigned int>(((resolution - 1) * (resolution - 1) * 6), 0);
+	indices = std::vector<size_t>(((resolution - 1) * (resolution - 1) * 6), 0);
 }
 //#include <iostream>
 TerrainFace::~TerrainFace()
@@ -31,7 +31,7 @@ void TerrainFace::CreateMesh(glm::vec3* localUp, Noise* noise, std::vector<INois
 	{
 		for (size_t x = 0; x < resolution; x++)
 		{
-			unsigned int i = x + y * resolution;
+			size_t i = x + y * resolution;
 			glm::vec2 percent = glm::vec2(x, y);
 			percent /= (resolution - 1);
 			glm::vec3 pointOnUnitCube = *localUp + (percent.x - 0.5f) * 2 * axisA + (percent.y - 0.5f) * 2 * axisB;
@@ -121,9 +121,9 @@ void TerrainFace::CalculateAverageNormals()//TODO: Refactor,
 	std::vector<glm::vec3> normals(positions.size(),glm::vec3(0.0f));
 	for (size_t i = 0; i < indices.size(); i+=3)
 	{
-		unsigned int in0 = indices[i];
-		unsigned int in1 = indices[i + 1];
-		unsigned int in2 = indices[i + 2];
+		size_t in0 = indices[i];
+		size_t in1 = indices[i + 1];
+		size_t in2 = indices[i + 2];
 		glm::vec3 v1(positions[in1] - positions[in0]);
 		glm::vec3 v2(positions[in2] - positions[in0]);
 		glm::vec3 normal = glm::cross(v1, v2);
