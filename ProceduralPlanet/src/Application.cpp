@@ -107,12 +107,11 @@ int main(void)
 	window_flags |= ImGuiWindowFlags_NoCollapse;
 
 	int counter = 0;
-	bool isContinousUpdate = false;
+	bool isContinousUpdate = true;
+	bool isEdited = false;
 	ImGradient gradient;
 	static ImGradientMark* draggingMark = nullptr;
 	static ImGradientMark* selectedMark = nullptr;
-
-	
 
 	/* Loop until the user closes the window */
 	while (!window.IsClosing())
@@ -145,6 +144,7 @@ int main(void)
 				counter++;
 			}
 			ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
+			ImGui::Text("Triangle count: %d", planet.GetTriCount());//TODO: store this
 			ImGui::Checkbox("Continuos Update", &isContinousUpdate);
 			if (ImGui::GradientEditor(&gradient, draggingMark, selectedMark))
 			{
@@ -156,13 +156,14 @@ int main(void)
 			ImGui::SliderFloat("Debug Float",&debugShaderFloat, 0.0f, 1.0f);
 			shader.SetFloat(SHADER_UNIFORM::DEBUG_FLOAT, debugShaderFloat);
 			*/
-			if ( ImGui::Button("Generate")||(isContinousUpdate&& counter >=60))
+			if ( ImGui::Button("Generate")||(isContinousUpdate && counter >=60 && isEdited && !planet.IsBusy()))
 			{
 				planet.CreatePlanet(resolution, noiseSettings);
-
+				planet.SetTexture(gradient);//Note: to resize texture
+				isEdited = false;
 				counter = 0;
 			}
-			ImGui::SliderInt("Resolution", (int*)(&resolution), 2, 1000);
+			isEdited |= ImGui::SliderInt("Resolution", (int*)(&resolution), 2, 1000);
 			for (int i = 0; i < noiseSettings.size(); i++)
 			{
 				std::string index = std::to_string(i);
@@ -180,16 +181,16 @@ int main(void)
 				std::string header = noiseType + " Noise-" + index;
 				if (ImGui::CollapsingHeader(header.c_str()))
 				{
-					ImGui::SliderInt(std::string("Number of Iteration###1" + index).c_str(), (int*)&noiseSettings[i]->numberOfLayers, 1, 10);
-					ImGui::SliderFloat(std::string("Base Roughness###2" + index).c_str(), &noiseSettings[i]->baseRoughness, 0.0f, 5.0f);
-					ImGui::SliderFloat(std::string("Strength###3" + index).c_str(), &noiseSettings[i]->strength, 0.0f, 5.0f);
-					ImGui::SliderFloat(std::string("Roughness###4" + index).c_str(), &noiseSettings[i]->roughness, 0.0f, 5.0f);
-					ImGui::SliderFloat(std::string("Persistence###5" + index).c_str(), &noiseSettings[i]->persistence, 0.0f, 5.0f);
-					ImGui::SliderFloat(std::string("Min Value###6" + index).c_str(), &noiseSettings[i]->minValue, 0.0f, 5.0f);
-					ImGui::SliderFloat3(std::string("Center###7" + index).c_str(), &noiseSettings[i]->center.x, 0.0f, 10.0f);
+					isEdited |=ImGui::SliderInt(std::string("Number of Iteration###1" + index).c_str(), (int*)&noiseSettings[i]->numberOfLayers, 1, 10);
+					isEdited |=ImGui::SliderFloat(std::string("Base Roughness###2" + index).c_str(), &noiseSettings[i]->baseRoughness, 0.0f, 5.0f);
+					isEdited |=ImGui::SliderFloat(std::string("Strength###3" + index).c_str(), &noiseSettings[i]->strength, 0.0f, 5.0f);
+					isEdited |=ImGui::SliderFloat(std::string("Roughness###4" + index).c_str(), &noiseSettings[i]->roughness, 0.0f, 5.0f);
+					isEdited |=ImGui::SliderFloat(std::string("Persistence###5" + index).c_str(), &noiseSettings[i]->persistence, 0.0f, 5.0f);
+					isEdited |=ImGui::SliderFloat(std::string("Min Value###6" + index).c_str(), &noiseSettings[i]->minValue, 0.0f, 5.0f);
+					isEdited |=ImGui::SliderFloat3(std::string("Center###7" + index).c_str(), &noiseSettings[i]->center.x, 0.0f, 10.0f);
 					if (noiseSettings[i]->type == NoiseType::Rigid)
 					{
-						ImGui::SliderFloat(std::string("Weight Multiplier###8" + index).c_str(), &((RigidNoiseSettings*)noiseSettings[i])->weightMultiplier, 0.0f, 5.0f);
+						isEdited |= ImGui::SliderFloat(std::string("Weight Multiplier###8" + index).c_str(), &((RigidNoiseSettings*)noiseSettings[i])->weightMultiplier, 0.0f, 5.0f);
 					}
 				}
 			}

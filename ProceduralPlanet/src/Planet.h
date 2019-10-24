@@ -34,14 +34,15 @@ private:
 private:
 	bool isBusy;
 	std::mutex sideCreation_Mutex;
-	std::vector<VerticesData*> futureData;
-	std::vector<std::future<void>> futures;
-	std::vector<GLIDs> planetSides;
+	std::vector<VerticesData*> meshDataPerFace;
+	std::vector<std::future<void>> planetSideMeshFutureHandle;
+	std::vector<GLIDs> meshGLIDs;
 	std::vector<glm::vec3> directions;
 	glm::vec2 elevationMinMax;
 	std::vector<Shader*> shaders;
 	unsigned int textureID;//Temp
 	size_t resolution;
+	size_t triCount;
 
 
 	VerticesData* CreatePlanetSide(size_t resolution, std::vector<INoiseSettings*> noiseSettings, glm::vec3 localUp);
@@ -58,7 +59,9 @@ public:
 	void Draw();
 
 	void Unbind();
+	bool IsBusy() { return isBusy; };
 	void AddShader(Shader* shader) { shaders.push_back(shader); };
+	size_t GetTriCount();
 
 };
 

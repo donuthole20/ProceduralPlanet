@@ -7,7 +7,7 @@
 
 Planet::Planet()
 {
-	planetSides.reserve(6);
+	meshGLIDs.reserve(6);
 	directions.reserve(6);
 	directions.emplace_back(0.0f, 1.0f, 0.0f);
 	directions.emplace_back(0.0f, -1.0f, 0.0f);
@@ -46,8 +46,8 @@ Planet::Planet()
 
 Planet::~Planet()
 {
-	planetSides.clear();
 	Unbind();
+	meshGLIDs.clear();
 }
 
 
@@ -63,13 +63,13 @@ void Planet::CreatePlanet(size_t resolution, std::vector<INoiseSettings*> noiseS
 	this->resolution = resolution;
 	elevationMinMax = glm::vec2(0.0f);
 #if THREADED == 1
-	futureData.clear();
-	futureData.reserve(6);
-	futures.clear();
-	futures.reserve(6);
+	meshDataPerFace.clear();
+	meshDataPerFace.reserve(6);
+	planetSideMeshFutureHandle.clear();
+	planetSideMeshFutureHandle.reserve(6);
 	for (int i = 0; i < directions.size(); i++)
 	{
-		futures.push_back(std::async(std::launch::async, [] 
+		planetSideMeshFutureHandle.push_back(std::async(std::launch::async, [] 
 			(Planet* planet, size_t resolution, std::vector<INoiseSettings*> settings,
 			std::vector<Planet::VerticesData*>* futureData, glm::vec3 direction, std::mutex* mutex)
 			{
@@ -77,7 +77,7 @@ void Planet::CreatePlanet(size_t resolution, std::vector<INoiseSettings*> noiseS
 				std::lock_guard < std::mutex > lock(*mutex);
 				futureData->push_back(face);
 			}, 
-			this, resolution, noiseSettings, &futureData, directions[i], &sideCreation_Mutex));
+			this, resolution, noiseSettings, &meshDataPerFace, directions[i], &sideCreation_Mutex));
 	}
 
 	
@@ -86,10 +86,11 @@ void Planet::CreatePlanet(size_t resolution, std::vector<INoiseSettings*> noiseS
 	//Not threaded
 	for (int i = 0; i < directions.size(); i++)
 	{
-		faces.emplace_back(*resolution);
-		faces[i].CreateMesh(&directions[i], &noise, noiseSettings);
-		faces[i].BindToGPU();
+		Planet::VerticesData* face = CreatePlanetSide(resolution, noiseSettings, directions[i]);
+		meshGLIDs.push_back(BindPlanetSide(face));
 	}
+	isBusy = false;
+	triCount = meshGLIDs[0].triCount * 6;
 
 #endif 
 
@@ -257,32 +258,33 @@ Planet::GLIDs Planet::BindPlanetSide(Planet::VerticesData* vertices)
 
 void Planet::Draw()
 {
-	if (futureData.size() == 6)
+#if THREADED == 1
+	if (meshDataPerFace.size() == 6)
 	{
 		Unbind();
-		planetSides.reserve(6);
-
-		for (int i = 0; i < futureData.size(); i++)
+		meshGLIDs.reserve(6);
+		for (int i = 0; i < meshDataPerFace.size(); i++)
 		{
-			planetSides.push_back(BindPlanetSide(futureData[i]));
+			meshGLIDs.push_back(BindPlanetSide(meshDataPerFace[i]));
 		}
-		futureData.clear();
+		meshDataPerFace.clear();
 		for (size_t i = 0; i < shaders.size(); i++)
 		{
 			shaders[i]->SetVec2(SHADER_UNIFORM::ELEVATION_MIN_MAX_POSITION, elevationMinMax);
 		}
-
+		triCount = meshGLIDs[0].triCount * 6;
 		isBusy = false;
 	}
+#endif
 
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, textureID);
 
-	for (int i = 0; i < planetSides.size(); i++)
+	for (int i = 0; i < meshGLIDs.size(); i++)
 	{
-		GLCall(glBindVertexArray(planetSides[i].vertexArrayObjectID));
-		GLCall(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, planetSides[i].indexBufferID));
-		GLCall(glDrawElements(GL_TRIANGLES, planetSides[i].triCount, GL_UNSIGNED_INT, nullptr));
+		GLCall(glBindVertexArray(meshGLIDs[i].vertexArrayObjectID));
+		GLCall(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, meshGLIDs[i].indexBufferID));
+		GLCall(glDrawElements(GL_TRIANGLES, meshGLIDs[i].triCount, GL_UNSIGNED_INT, nullptr));
 		GLCall(glBindVertexArray(0));
 		GLCall(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER,0));
 	}
@@ -293,15 +295,22 @@ void Planet::Draw()
 
 void Planet::Unbind()
 {
-	for (int i = 0; i < planetSides.size(); i++)
+	for (int i = 0; i < meshGLIDs.size(); i++)
 	{
 		GLCall(glBindVertexArray(0));
 		GLCall(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0));
 		GLCall(glBindBuffer(GL_ARRAY_BUFFER, 0));
 
-		GLCall(glDeleteVertexArrays(1, &planetSides[i].vertexArrayObjectID));
-		GLCall(glDeleteBuffers(1, &planetSides[i].vertexBufferID));
-		GLCall(glDeleteBuffers(1, &planetSides[i].indexBufferID));
+		GLCall(glDeleteVertexArrays(1, &meshGLIDs[i].vertexArrayObjectID));
+		GLCall(glDeleteBuffers(1, &meshGLIDs[i].vertexBufferID));
+		GLCall(glDeleteBuffers(1, &meshGLIDs[i].indexBufferID));
 	}
-	planetSides.clear();
+	meshGLIDs.clear();
+}
+
+size_t Planet::GetTriCount()
+{
+	
+	return triCount;
+	
 }
