@@ -159,6 +159,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="src\externallibs\imgui\imgui.cpp" />
+    <ClCompile Include="src\externallibs\imgui\imgui_color_gradient.cpp" />
     <ClCompile Include="src\externallibs\imgui\imgui_demo.cpp" />
     <ClCompile Include="src\externallibs\imgui\imgui_draw.cpp" />
     <ClCompile Include="src\externallibs\imgui\imgui_impl_glfw.cpp" />
@@ -179,6 +180,7 @@
     <ClInclude Include="src\ConfigMacros.h" />
     <ClInclude Include="src\externallibs\imgui\imconfig.h" />
     <ClInclude Include="src\externallibs\imgui\imgui.h" />
+    <ClInclude Include="src\externallibs\imgui\imgui_color_gradient.h" />
     <ClInclude Include="src\externallibs\imgui\imgui_impl_glfw.h" />
     <ClInclude Include="src\externallibs\imgui\imgui_impl_opengl3.h" />
     <ClInclude Include="src\externallibs\imgui\imgui_internal.h" />

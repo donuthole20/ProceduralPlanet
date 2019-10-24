@@ -138,7 +138,9 @@ void main()
 	vec4 greyScale = vec4(vCol.rgb * (1.0 - 1) + (grey * 1), 1.0);
 
 	//fragColor = overAllColor*((1-greyScale*0.7) + (greyScale*2));
-	vec3 albedo = overAllColor.rgb * u_albedo;
+	vec2 texCoord = vec2(0, elevationNormalized);
+	vec4 gradient = texture(texture1, texCoord);
+	vec3 albedo = gradient.rgb * u_albedo;
 
 	float metallic = (1 - waterMask * 0.8)  * u_metallic;
 	float roughness = clamp((waterMask+0.5),0.0,1.0) * u_roughness;
@@ -186,8 +188,7 @@ void main()
 	color = pow(color, vec3(1.0 / 2.2));
 
 	//fragColor = vec4(temp/);
-	vec2 texCoord = vec2(0, elevationNormalized);
-	vec4 gradient = texture(texture1, texCoord);
-	fragColor = vec4(color, 0.4);
+	
+	fragColor = vec4(color,1.0);
 };
 

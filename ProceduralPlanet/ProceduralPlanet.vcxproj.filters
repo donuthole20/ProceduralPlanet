@@ -63,6 +63,9 @@
     <ClCompile Include="src\externallibs\imgui\imgui_impl_glfw.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\externallibs\imgui\imgui_color_gradient.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\OpenGLErrorHandler.h">
@@ -126,6 +129,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\NoiseFilter.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\externallibs\imgui\imgui_color_gradient.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

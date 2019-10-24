@@ -23,6 +23,7 @@
 #include "externallibs/imgui/imgui.h"
 #include "externallibs/imgui/imgui_impl_glfw.h"
 #include "externallibs/imgui/imgui_impl_opengl3.h"
+#include "externallibs/imgui/imgui_color_gradient.h"
 
 
 int main(void)
@@ -107,6 +108,12 @@ int main(void)
 
 	int counter = 0;
 	bool isContinousUpdate = false;
+	ImGradient gradient;
+	static ImGradientMark* draggingMark = nullptr;
+	static ImGradientMark* selectedMark = nullptr;
+
+	
+
 	/* Loop until the user closes the window */
 	while (!window.IsClosing())
 	{
@@ -139,6 +146,11 @@ int main(void)
 			}
 			ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
 			ImGui::Checkbox("Continuos Update", &isContinousUpdate);
+			if (ImGui::GradientEditor(&gradient, draggingMark, selectedMark))
+			{
+				planet.SetTexture(gradient);
+			}
+
 			/*
 			static float debugShaderFloat = 0.0f;
 			ImGui::SliderFloat("Debug Float",&debugShaderFloat, 0.0f, 1.0f);
@@ -147,10 +159,10 @@ int main(void)
 			if ( ImGui::Button("Generate")||(isContinousUpdate&& counter >=60))
 			{
 				planet.CreatePlanet(resolution, noiseSettings);
+
 				counter = 0;
 			}
 			ImGui::SliderInt("Resolution", (int*)(&resolution), 2, 1000);
-			ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
 			for (int i = 0; i < noiseSettings.size(); i++)
 			{
 				std::string index = std::to_string(i);

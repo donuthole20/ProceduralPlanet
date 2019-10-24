@@ -8,6 +8,8 @@
 #include "Shader.h"
 #include "NoiseFilter.h"
 
+#include "externallibs/imgui/imgui_color_gradient.h"
+
 class Planet
 {
 private:
@@ -39,6 +41,7 @@ private:
 	glm::vec2 elevationMinMax;
 	std::vector<Shader*> shaders;
 	unsigned int textureID;//Temp
+	size_t resolution;
 
 
 	VerticesData* CreatePlanetSide(size_t resolution, std::vector<INoiseSettings*> noiseSettings, glm::vec3 localUp);
@@ -50,6 +53,7 @@ public:
 	~Planet();
 
 	void CreatePlanet(size_t resolution, std::vector<INoiseSettings*> noiseSettings);
+	void SetTexture(ImGradient& gradient);
 
 	void Draw();
 

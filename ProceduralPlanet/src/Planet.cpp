@@ -17,28 +17,31 @@ Planet::Planet()
 	directions.emplace_back(0.0f, 0.0f, -1.0f);
 	isBusy = false;
 
+
 	std::vector<glm::lowp_u8vec3> textureData;
 	size_t height = 50;
 	size_t width = 1;
 	textureData.reserve(50);
 	for (int i = 0; i < height; i++)
 	{
-		unsigned char r =(unsigned char)glm::min((int)(i * ((255 / (height - 1)))),255);
+		unsigned char r = (unsigned char)glm::min((int)(i * ((255 / (height - 1)))), 255);
 		unsigned char g = 0;
 		unsigned char b = 0;
-		textureData.emplace_back(r,g,b);
+		textureData.emplace_back(r, g, b);
 	}
+
 	glGenTextures(1, &textureID);
-	glBindTexture(GL_TEXTURE_2D,textureID);
+	glBindTexture(GL_TEXTURE_2D, textureID);
 
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+	glPixelStorei(GL_UNPACK_ALIGNMENT, 1);//Note: this is padding, default is for
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, 1, 50, 0, GL_RGB, GL_UNSIGNED_BYTE, &textureData[0]);
 	glGenerateMipmap(GL_TEXTURE_2D);
 	glBindTexture(GL_TEXTURE_2D, 0);
+	
 }
 
 Planet::~Planet()
@@ -57,7 +60,7 @@ void Planet::CreatePlanet(size_t resolution, std::vector<INoiseSettings*> noiseS
 	}
 
 	isBusy = true;
-
+	this->resolution = resolution;
 	elevationMinMax = glm::vec2(0.0f);
 #if THREADED == 1
 	futureData.clear();
@@ -91,6 +94,37 @@ void Planet::CreatePlanet(size_t resolution, std::vector<INoiseSettings*> noiseS
 #endif 
 
 
+}
+
+void Planet::SetTexture(ImGradient& gradient)
+{
+	if (!textureID)
+	{
+	//	glDeleteTextures(1, &textureID);
+		glGenTextures(1, &textureID);
+		glBindTexture(GL_TEXTURE_2D, textureID);
+	}
+	std::vector<glm::lowp_u8vec3> textureData;
+	size_t height = resolution* gradient.getMarks().size();
+	size_t width = 1;
+	textureData.reserve(height);
+	for (int i = 0; i < height; i++)
+	{
+		float color[3];
+		double pos = (float)(i+1) / (float)height;
+		gradient.getColorAt(pos, color);
+		textureData.emplace_back(color[0]*255, color[1] * 255, color[2] * 255);
+	}
+	
+
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glPixelStorei(GL_UNPACK_ALIGNMENT, 1);//Note: this is padding, default is for
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, &textureData[0]);
+	glGenerateMipmap(GL_TEXTURE_2D);
+	glBindTexture(GL_TEXTURE_2D, 0);
 }
 
 Planet::VerticesData* Planet::CreatePlanetSide(size_t resolution, std::vector<INoiseSettings*> noiseSettings,glm::vec3 localUp)
