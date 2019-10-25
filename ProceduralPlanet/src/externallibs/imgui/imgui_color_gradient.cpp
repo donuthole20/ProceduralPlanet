@@ -22,7 +22,10 @@ ImGradient::~ImGradient()
 {
 	for (ImGradientMark* mark : m_marks)
 	{
-		delete mark;
+		if (mark)
+		{
+			delete mark;
+		}
 	}
 }
 

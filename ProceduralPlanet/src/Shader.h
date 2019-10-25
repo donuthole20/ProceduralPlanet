@@ -16,6 +16,7 @@ enum class SHADER_UNIFORM
 	LIGHT_COLORS,
 	CAMERA_POSITION,
 	ELEVATION_MIN_MAX_POSITION,
+	BIOMES_COUNT,
 	DEBUG_FLOAT
 };
 
@@ -37,6 +38,7 @@ public:
 	void SetVec2(SHADER_UNIFORM uniform, glm::vec2 vector);
 	void SetVec3(SHADER_UNIFORM uniform, glm::vec3 vector);
 	void SetFloat(SHADER_UNIFORM uniform, float value);
+	void SetInt(SHADER_UNIFORM uniform, int value);
 
 };
 

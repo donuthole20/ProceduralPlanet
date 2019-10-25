@@ -109,10 +109,23 @@ int main(void)
 	int counter = 0;
 	bool isContinousUpdate = true;
 	bool isEdited = false;
-	ImGradient gradient;
-	static ImGradientMark* draggingMark = nullptr;
-	static ImGradientMark* selectedMark = nullptr;
 
+	PlanetTexture planetTexture;
+	//temp
+	planetTexture.biomes.reserve(3);
+	planetTexture.biomes.emplace_back();
+	planetTexture.biomes.emplace_back();
+	planetTexture.biomes.emplace_back();
+
+	
+	 struct GradientMarks
+	 {
+		 ImGradientMark* draggingMark = nullptr;
+		 ImGradientMark* selectedMark = nullptr;
+	 };
+	 std::vector<GradientMarks> biomesMarks(planetTexture.biomes.size(), GradientMarks());
+	
+	 planet.SetTexture(planetTexture);
 	/* Loop until the user closes the window */
 	while (!window.IsClosing())
 	{
@@ -133,7 +146,7 @@ int main(void)
 		shader.SetMat4x4(SHADER_UNIFORM::VIEW, camera.GetViewMatrix());
 #endif 
 		
-		model = glm::rotate(model, glm::radians(0.2f), glm::vec3(0.8f, 1.0f, 0.0f));
+		model = glm::rotate(model, glm::radians(0.2f), glm::vec3(0.0f, 1.0f, 0.0f));
 		shader.SetMat4x4(SHADER_UNIFORM::MODEL, model);
 
 		{
@@ -145,21 +158,42 @@ int main(void)
 			}
 			ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
 			ImGui::Text("Triangle count: %d", planet.GetTriCount());//TODO: store this
+			
+			ImGui::NewLine();
 			ImGui::Checkbox("Continuos Update", &isContinousUpdate);
-			if (ImGui::GradientEditor(&gradient, draggingMark, selectedMark))
+			ImGui::NewLine();
+
+			bool isTextureEdited = false;
+			for (unsigned int i = 0; i < planetTexture.biomes.size(); i++)
 			{
-				planet.SetTexture(gradient);
+				std::string header = "Biome(" + std::to_string(i) + "):";
+				if ((ImGui::CollapsingHeader(header.c_str())))
+				{
+					isTextureEdited |= ImGui::GradientEditor(&planetTexture.biomes[i], biomesMarks[i].draggingMark, biomesMarks[i].selectedMark);
+				}
+				else
+				{
+					biomesMarks[i].draggingMark = nullptr;
+					biomesMarks[i].selectedMark = nullptr;
+				}
 			}
+			if (isTextureEdited)
+			{
+				planet.SetTexture(planetTexture);
+				isTextureEdited = false;
+			}
+			
 
 			/*
 			static float debugShaderFloat = 0.0f;
 			ImGui::SliderFloat("Debug Float",&debugShaderFloat, 0.0f, 1.0f);
 			shader.SetFloat(SHADER_UNIFORM::DEBUG_FLOAT, debugShaderFloat);
 			*/
+			ImGui::NewLine();
 			if ( ImGui::Button("Generate")||(isContinousUpdate && counter >=60 && isEdited && !planet.IsBusy()))
 			{
 				planet.CreatePlanet(resolution, noiseSettings);
-				planet.SetTexture(gradient);//Note: to resize texture
+				planet.SetTexture(planetTexture);//Note: to resize texture
 				isEdited = false;
 				counter = 0;
 			}

@@ -9,13 +9,56 @@ out float dist;
 out vec3 WorldPos;
 out vec3 Normal;
 
+out float biomePercent;
+
 uniform mat4 u_projectionMatrix;
 uniform mat4 u_viewMatrix;
 uniform mat4 u_modelMatrix;
 
 
+uniform int u_biomesCount;
+
+float InverseLerp(float value, float min, float max);
+
+float InverseLerp(float value, float min, float max) 
+{
+	return ((value - min)) / (max - min);
+}
+
+float PHI = 1.61803398874989484820459 * 00000.1; // Golden Ratio   
+float PI = 3.14159265358979323846264 * 00000.1; // PI
+float SQ2 = 1.41421356237309504880169 * 10000.0; // Square Root of Two
+
+float gold_noise(vec2 coordinate, float seed);
+
+float gold_noise(vec2 coordinate, float seed) {
+	return fract(tan(distance(coordinate * (seed + PHI), vec2(PHI, PI))) * SQ2);
+}
+
 void main()
 {
+
+	float heightPercent = (position.y + 1) / 2f;
+	float biomeIndex = 0;
+	float blendRange = gold_noise(position.xy, position.z) / 2 + 0.001f;
+	
+	
+	for (int i = 0; i < u_biomesCount; i++)
+	{
+		int multiplier = i;
+		if (i > 0)
+		{
+			multiplier = i + (i - 1);
+		}
+		float dst = heightPercent - 0.25 * multiplier;
+		
+		float weight = clamp(InverseLerp(dst,-blendRange, blendRange),0,1);
+		biomeIndex *= (1-weight);
+		biomeIndex += i* weight;
+	}
+
+	biomePercent = biomeIndex / max(1,2);
+
 	//vCol = vec4(clamp(position,0.0f,1.0f),1.0f);
 	vCol = vec4(normal,1.0);
 	dist = distance(vec3(0.0), position.xyz);
@@ -39,6 +82,7 @@ in vec3 Normal;
 
 in vec4 vCol;
 in float dist;
+in float biomePercent;
 
 uniform vec2 u_elevationMinMax;
 uniform sampler2D texture1;
@@ -112,38 +156,17 @@ vec3 fresnelSchlick(float cosTheta, vec3 F0)
 
 void main()
 {
-	float waterMask = map(dist, 1, 1.01, 0, 0.5);
 	float elevationNormalized = map(dist, u_elevationMinMax.x, u_elevationMinMax.y, 0, 1);
-	float mappedDist = map(dist, 1, 1.2, 0, 1 );
-
-	vec3 waterColor = vec3(0.04, 0.35, 0.76);
-	vec3 landGrass = vec3(0.17255, 0.46275, 0.10196);
-	vec3 landBrown = vec3(0.33725, 0.29804, 0.14118);
-	float landMixValue = map(mappedDist, 0.05, 1, 0, 1);
-	vec3 landColor = mix(landGrass, landBrown, min(landMixValue,1));
-
-	float landWaterMixValue = mappedDist;
-	if (landWaterMixValue != 0 && landWaterMixValue <= 0.05)
-	{
-		landWaterMixValue = 0.8;
-	}
-	else 
-	{
-		landWaterMixValue = ceil(mappedDist);
-	}
-
-	vec4 overAllColor = vec4(mix(waterColor, landColor, min(waterMask,1)), 1.0);
-
+	
 	float grey = 0.21 * vCol.r + 0.71 * vCol.g + 0.07 * vCol.b;
 	vec4 greyScale = vec4(vCol.rgb * (1.0 - 1) + (grey * 1), 1.0);
 
-	//fragColor = overAllColor*((1-greyScale*0.7) + (greyScale*2));
-	vec2 texCoord = vec2(0, elevationNormalized);
+	vec2 texCoord = vec2(biomePercent, elevationNormalized);
 	vec4 gradient = texture(texture1, texCoord);
 	vec3 albedo = gradient.rgb * u_albedo;
 
-	float metallic = (1 - waterMask * 0.8)  * u_metallic;
-	float roughness = clamp((waterMask+0.5),0.0,1.0) * u_roughness;
+	float metallic = (1 - elevationNormalized * 0.8)  * u_metallic;
+	float roughness = clamp((elevationNormalized+0.5),0.0,1.0) * u_roughness;
 	float ao = u_ao;
 
 	vec3 N = normalize(Normal);

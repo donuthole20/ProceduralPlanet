@@ -10,6 +10,13 @@
 
 #include "externallibs/imgui/imgui_color_gradient.h"
 
+
+
+struct PlanetTexture
+{
+	std::vector<ImGradient> biomes;
+};
+
 class Planet
 {
 private:
@@ -44,7 +51,6 @@ private:
 	unsigned int resolution;
 	unsigned int triCount;
 
-
 	VerticesData* CreatePlanetSide(unsigned int resolution, std::vector<INoiseSettings*> noiseSettings, glm::vec3 localUp);
 	GLIDs BindPlanetSide(VerticesData* vertices);
 
@@ -54,7 +60,7 @@ public:
 	~Planet();
 
 	void CreatePlanet(unsigned int resolution, std::vector<INoiseSettings*> noiseSettings);
-	void SetTexture(ImGradient& gradient);
+	void SetTexture(PlanetTexture& texture);
 
 	void Draw();
 

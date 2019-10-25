@@ -65,6 +65,7 @@ Shader::Shader(const char* filepath)
 	AddUniformID(SHADER_UNIFORM::LIGHT_COLORS, "u_lightColors[0]");
 	AddUniformID(SHADER_UNIFORM::CAMERA_POSITION, "u_camPos");
 	AddUniformID(SHADER_UNIFORM::ELEVATION_MIN_MAX_POSITION, "u_elevationMinMax");
+	AddUniformID(SHADER_UNIFORM::BIOMES_COUNT, "u_biomesCount");
 	AddUniformID(SHADER_UNIFORM::DEBUG_FLOAT, "u_debugFloat");
 	
 
@@ -153,6 +154,11 @@ void Shader::SetVec3(SHADER_UNIFORM uniform, glm::vec3 vector)
 void Shader::SetFloat(SHADER_UNIFORM uniform, float value)
 {
 	glUniform1f(uniformIDs[uniform], value);
+}
+
+void Shader::SetInt(SHADER_UNIFORM uniform, int value)
+{
+	glUniform1i(uniformIDs[uniform], value);
 }
 
 

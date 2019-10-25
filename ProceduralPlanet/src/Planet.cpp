@@ -18,30 +18,6 @@ Planet::Planet()
 	isBusy = false;
 
 
-	std::vector<glm::lowp_u8vec3> textureData;
-	unsigned int height = 50;
-	unsigned int width = 1;
-	textureData.reserve(50);
-	for (int i = 0; i < height; i++)
-	{
-		unsigned char r = (unsigned char)glm::min((int)(i * ((255 / (height - 1)))), 255);
-		unsigned char g = 0;
-		unsigned char b = 0;
-		textureData.emplace_back(r, g, b);
-	}
-
-	glGenTextures(1, &textureID);
-	glBindTexture(GL_TEXTURE_2D, textureID);
-
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	glPixelStorei(GL_UNPACK_ALIGNMENT, 1);//Note: this is padding, default is for
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, 1, 50, 0, GL_RGB, GL_UNSIGNED_BYTE, &textureData[0]);
-	glGenerateMipmap(GL_TEXTURE_2D);
-	glBindTexture(GL_TEXTURE_2D, 0);
-	
 }
 
 Planet::~Planet()
@@ -94,7 +70,7 @@ void Planet::CreatePlanet(unsigned int resolution, std::vector<INoiseSettings*> 
 #endif 
 }
 
-void Planet::SetTexture(ImGradient& gradient)
+void Planet::SetTexture(PlanetTexture& texture)
 {
 	if (!textureID)
 	{
@@ -102,24 +78,45 @@ void Planet::SetTexture(ImGradient& gradient)
 		glGenTextures(1, &textureID);
 		glBindTexture(GL_TEXTURE_2D, textureID);
 	}
-	std::vector<glm::lowp_u8vec3> textureData;
-	unsigned int height = resolution* gradient.getMarks().size();
-	unsigned int width = 1;
-	textureData.reserve(height);
-	for (int i = 0; i < height; i++)
+
+	for (unsigned int i = 0; i < shaders.size(); i++)
 	{
-		float color[3];
-		double pos = (float)(i+1) / (float)height;
-		gradient.getColorAt(pos, color);
-		textureData.emplace_back(color[0]*255, color[1] * 255, color[2] * 255);
+		shaders[i]->SetInt(SHADER_UNIFORM::BIOMES_COUNT, texture.biomes.size());
 	}
 
+	std::vector<glm::lowp_u8vec3> textureData;
+	unsigned int highestMarkCount = 0;
+	for (unsigned int i = 0; i < texture.biomes.size(); i++)
+	{
+		if (highestMarkCount < texture.biomes[i].getMarks().size())
+		{
+			highestMarkCount = texture.biomes[i].getMarks().size();
+		}
+		
+	}
+	unsigned int height = resolution * highestMarkCount;
+	unsigned int width = texture.biomes.size();
+	textureData.reserve((size_t)height * (size_t)width);
+	
+	for (int y = 0; y < height; y++)
+	{
+		double pos = (float)(y + 1) / (float)height;
+		for (int x = 0; x < width; x++)
+		{
+			float color[3];
+			texture.biomes[x].getColorAt(pos, color);
+			ImColor tintedColor = ImColor(color[0] * 255, color[1] * 255, color[2] * 255);
+			textureData.emplace_back(tintedColor.Value.x, tintedColor.Value.y, tintedColor.Value.z);
+		}
+	}
+	
+	
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER , GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 	glPixelStorei(GL_UNPACK_ALIGNMENT, 1);//Note: this is padding, default is for
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, &textureData[0]);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, &textureData[0]);
 	glGenerateMipmap(GL_TEXTURE_2D);
 	glBindTexture(GL_TEXTURE_2D, 0);
 }
@@ -176,6 +173,7 @@ Planet::VerticesData* Planet::CreatePlanetSide(unsigned int resolution, std::vec
 			}
 			
 			data->vertices[i] = pointOnUnitSphere *elevation;
+
 			if (x != resolution - 1 && y != resolution - 1)
 			{
 				data->indices[triIndex] = i;
