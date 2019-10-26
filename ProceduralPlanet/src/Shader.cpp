@@ -66,6 +66,7 @@ Shader::Shader(const char* filepath)
 	AddUniformID(SHADER_UNIFORM::CAMERA_POSITION, "u_camPos");
 	AddUniformID(SHADER_UNIFORM::ELEVATION_MIN_MAX_POSITION, "u_elevationMinMax");
 	AddUniformID(SHADER_UNIFORM::BIOMES_COUNT, "u_biomesCount");
+	AddUniformID(SHADER_UNIFORM::TIME, "u_time");
 	AddUniformID(SHADER_UNIFORM::DEBUG_FLOAT, "u_debugFloat");
 	
 

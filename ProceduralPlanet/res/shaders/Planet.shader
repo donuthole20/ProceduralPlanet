@@ -18,6 +18,8 @@ uniform mat4 u_modelMatrix;
 
 uniform int u_biomesCount;
 
+uniform float u_time;
+
 float InverseLerp(float value, float min, float max);
 
 float InverseLerp(float value, float min, float max) 
@@ -25,14 +27,22 @@ float InverseLerp(float value, float min, float max)
 	return ((value - min)) / (max - min);
 }
 
-float PHI = 1.61803398874989484820459 * 00000.1; // Golden Ratio   
-float PI = 3.14159265358979323846264 * 00000.1; // PI
-float SQ2 = 1.41421356237309504880169 * 10000.0; // Square Root of Two
+float rand2D( vec2 co);
+float rand2D( vec2 co) 
+{
+	return fract(sin(dot(co.xy, vec2(12.9898, 78.233))) * 43758.5453);
+}
 
-float gold_noise(vec2 coordinate, float seed);
-
-float gold_noise(vec2 coordinate, float seed) {
-	return fract(tan(distance(coordinate * (seed + PHI), vec2(PHI, PI))) * SQ2);
+vec2 SineWave(vec2 p);
+vec2 SineWave(vec2 p)
+{
+	// convert Vertex position <-1,+1> to texture coordinate <0,1> and some shrinking so the effect dont overlap screen
+	p.x = (0.55 * p.x) + 0.5;
+	p.y = (-0.55 * p.y) + 0.5;
+	// wave distortion
+	float x = sin(250.0 * p.y + 300.0 * p.x + 4 * u_time) * 0.05;
+	float y = sin(250.0 * p.y + 300.0 * p.x + 4 * u_time) * 0.05;
+	return vec2(p.x + x, p.y + y);
 }
 
 void main()
@@ -40,7 +50,7 @@ void main()
 
 	float heightPercent = (position.y + 1) / 2f;
 	float biomeIndex = 0;
-	float blendRange = gold_noise(position.xy, position.z) / 2 + 0.001f;
+	float blendRange = rand2D(position.xy) / 2 + 0.001f;
 	
 	
 	for (int i = 0; i < u_biomesCount; i++)
@@ -60,13 +70,21 @@ void main()
 	biomePercent = biomeIndex / max(1,2);
 
 	//vCol = vec4(clamp(position,0.0f,1.0f),1.0f);
-	vCol = vec4(normal,1.0);
 	dist = distance(vec3(0.0), position.xyz);
 	//dist =	length(position);
 	//gl_Position = projectionMatrix *  modelMatrix * viewMatrix * vec4(position,1.0f);
 
+	vec3 offset = normal;
+	if (dist <= 1)
+	{
+		offset += vec3(SineWave(normal.xz),0.0);
+	}
+	
+	
+	Normal = mat3(u_modelMatrix) * offset;
 	WorldPos = vec3(u_modelMatrix * vec4(position, 1.0));
-	Normal = mat3(u_modelMatrix) * normal;
+	
+	//vCol = vec4(SineWave(position.xy),1.0,1.0);
 
 	gl_Position = u_projectionMatrix * u_viewMatrix * vec4(WorldPos, 1.0);
 };

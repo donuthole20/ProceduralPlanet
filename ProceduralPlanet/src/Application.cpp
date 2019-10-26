@@ -148,6 +148,7 @@ int main(void)
 		
 		model = glm::rotate(model, glm::radians(0.2f), glm::vec3(0.0f, 1.0f, 0.0f));
 		shader.SetMat4x4(SHADER_UNIFORM::MODEL, model);
+		shader.SetFloat(SHADER_UNIFORM::TIME, window.GetCurrentTime());
 
 		{
 			ImGui::SetNextWindowSize(ImVec2(500, 400), ImGuiCond_FirstUseEver);
