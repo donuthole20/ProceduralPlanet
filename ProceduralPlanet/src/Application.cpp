@@ -61,6 +61,7 @@ int main(void)
 		noiseSettings[1].minValue = 1.25f;
 		
 		noiseSettings.emplace_back();
+		noiseSettings[2].type = NoiseType::Rigid;
 		noiseSettings[2].strength = 1.0f;
 		noiseSettings[2].numberOfLayers = 4;
 		noiseSettings[2].baseRoughness = 1.59f;
@@ -185,11 +186,11 @@ int main(void)
 					noiseType = "Simple";
 					break;
 				case NoiseType::Rigid:
-					noiseType = "Rigid";
+					noiseType = "Rigid ";
 					break;
 				}
 				
-				std::string header = noiseType + " Noise-" + index;
+				std::string header = noiseType + " Noise " + index;
 				if (ImGui::CollapsingHeader(header.c_str()))
 				{
 					if (noiseSettings.size() > 1)
@@ -201,6 +202,7 @@ int main(void)
 							break;
 						}
 					}
+					isEdited |= ImGui::Combo(std::string("Type###1" + index).c_str(),(int*)&noiseSettings[i].type, NoiseTypeString, IM_ARRAYSIZE(NoiseTypeString));
 					isEdited |=ImGui::SliderInt(std::string("Number of Iteration###1" + index).c_str(), (int*)&noiseSettings[i].numberOfLayers, 1, 10);
 					isEdited |=ImGui::SliderFloat(std::string("Base Roughness###2" + index).c_str(), &noiseSettings[i].baseRoughness, 0.0f, 5.0f);
 					isEdited |=ImGui::SliderFloat(std::string("Strength###3" + index).c_str(), &noiseSettings[i].strength, 0.0f, 5.0f);
@@ -231,7 +233,7 @@ int main(void)
 
 			for (int i = (planetTexture.biomes.size() - 1); i >= 0; --i)
 			{
-				std::string header = "Biome###" + std::to_string(i);
+				std::string header = "Biome " + std::to_string(planetTexture.biomes.size()-i)+ "###"+ std::to_string(i);
 				if ((ImGui::CollapsingHeader(header.c_str())))
 				{
 					if (planetTexture.biomes.size() > 2)
