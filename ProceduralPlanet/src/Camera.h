@@ -25,7 +25,7 @@ public:
 	void HandleMousePositionInput(float xChange, float yChange);
 	void HandleKeyInputUpdate(float deltaTime);
 	void SetAspectRatio(float aspectRatio);
-	glm::vec3 GetPosition() { return position; };
+	glm::vec3 GetPosition();
 	void AddShader(Shader* shader);
 };
 

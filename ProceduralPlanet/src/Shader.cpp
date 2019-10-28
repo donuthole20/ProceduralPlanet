@@ -84,8 +84,6 @@ void Shader::AddUniformID(SHADER_UNIFORM uniform, const char* uniformName)
 	uniformIDs.insert(std::pair<SHADER_UNIFORM, unsigned int>(uniform, uniformID));
 }
 
-
-
 unsigned int Shader::CompileShader(unsigned int type, const char* source)
 {
 	unsigned int id = glCreateShader(type);
@@ -125,11 +123,14 @@ unsigned int Shader::CompileShader(unsigned int type, const char* source)
 	return id;
 }
 
-
-
-void Shader::UseShader()
+void Shader::Bind()
 {
 	GLCall(glUseProgram(shaderProgramID));
+}
+
+void Shader::Unbind()
+{
+	GLCall(glUseProgram(0));
 }
 
 void Shader::DeleteShader()
@@ -161,7 +162,6 @@ void Shader::SetInt(SHADER_UNIFORM uniform, int value)
 {
 	glUniform1i(uniformIDs[uniform], value);
 }
-
 
 Shader::~Shader()
 {

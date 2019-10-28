@@ -16,7 +16,7 @@ ImGradient::ImGradient()
 {
 	//addMark(0.0f, ImColor(1.0f, 1.0f, 1.0f));
     addMark(0.0f, ImColor(0.0f,0.26f,1.0f));
-    addMark(0.3f, ImColor(0.05f,0.98f,0.0f));
+    addMark(0.05f, ImColor(0.05f,0.98f,0.0f));
 }
 
 ImGradient::~ImGradient()

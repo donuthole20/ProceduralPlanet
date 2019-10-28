@@ -12,9 +12,22 @@
 
 
 
+struct Gradient
+{
+	ImGradient gradient;
+	ImGradientMark* draggingMark = nullptr;
+	ImGradientMark* selectedMark = nullptr;
+};
 struct PlanetTexture
 {
-	std::vector<ImGradient> biomes;
+	std::vector<Gradient*> biomes;
+	~PlanetTexture()
+	{
+		for (size_t i = 0; i < biomes.size(); i++)
+		{
+			delete biomes[i];
+		}
+	}
 };
 
 class Planet
@@ -46,29 +59,30 @@ private:
 	std::vector<GLIDs> meshGLIDs;
 	std::vector<glm::vec3> directions;
 	glm::vec2 elevationMinMax;
-	std::vector<Shader*> shaders;
+	Shader shader;
 	unsigned int textureID;//Temp
 	unsigned int resolution;
 	unsigned int triCount;
 
-	VerticesData* CreatePlanetSide(unsigned int resolution, std::vector<INoiseSettings*> noiseSettings, glm::vec3 localUp);
-	GLIDs BindPlanetSide(VerticesData* vertices);
+	VerticesData* CreatePlanetSide(unsigned int resolution, std::vector<NoiseSettings> noiseSettings, glm::vec3 localUp);
+	GLIDs BindVertexData(VerticesData* vertices);
 
 public:
 
 	Planet();
 	~Planet();
 
-	void CreatePlanet(unsigned int resolution, std::vector<INoiseSettings*> noiseSettings);
+	void CreatePlanet(unsigned int resolution, std::vector<NoiseSettings> noiseSettings);
 	void SetTexture(PlanetTexture& texture);
 
 	void Draw();
 
 	void Unbind();
-	bool IsBusy() { return isBusy; };
-	void AddShader(Shader* shader) { shaders.push_back(shader); };
+	bool IsBusy();
 	unsigned int GetTriCount();
-
+	Shader* GetShader();
+	void SetModelMatrix(glm::mat4 model);
+	void SetShaderTime(float time);
 };
 
 

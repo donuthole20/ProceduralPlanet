@@ -116,9 +116,10 @@ void Camera::HandleKeyInputUpdate(float deltaTime)
 
 	for (size_t i = 0; i < shaderList.size(); i++)
 	{
-		shaderList[i]->UseShader();
+		shaderList[i]->Bind();
 		shaderList[i]->SetMat4x4(SHADER_UNIFORM::VIEW, GetViewMatrix());
 		shaderList[i]->SetVec3(SHADER_UNIFORM::CAMERA_POSITION, position);
+		shaderList[i]->Unbind();
 	}
 }
 
@@ -127,17 +128,24 @@ void Camera::SetAspectRatio(float aspectRatio)
 	projectionMatrix = glm::perspective(fieldOfView, aspectRatio, nearPlane, farPlane);
 	for (size_t i = 0; i < shaderList.size(); i++)
 	{
-		shaderList[i]->UseShader();
+		shaderList[i]->Bind();
 		shaderList[i]->SetMat4x4(SHADER_UNIFORM::PROJECTION, projectionMatrix);
+		shaderList[i]->Unbind();
 	}
+}
+
+glm::vec3 Camera::GetPosition()
+{
+	return position;
 }
 
 void Camera::AddShader(Shader* shader)
 {
-	shader->UseShader();
+	shader->Bind();
 	shader->SetMat4x4(SHADER_UNIFORM::PROJECTION, projectionMatrix);
 	shader->SetMat4x4(SHADER_UNIFORM::VIEW, GetViewMatrix());
 	shader->SetVec3(SHADER_UNIFORM::CAMERA_POSITION, position);
+	shader->Unbind();
 
 	shaderList.push_back(shader);
 }

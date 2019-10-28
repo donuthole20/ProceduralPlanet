@@ -33,7 +33,8 @@ private:
 public:
 	~Shader();
 	Shader(const char* filepath);
-	void UseShader();
+	void Bind();
+	void Unbind();
 	void DeleteShader();
 	void SetMat4x4(SHADER_UNIFORM uniform, glm::mat4 matrix);
 	void SetVec2(SHADER_UNIFORM uniform, glm::vec2 vector);
