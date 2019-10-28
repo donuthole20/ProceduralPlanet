@@ -103,6 +103,7 @@ int main(void)
 
 	PlanetTexture planetTexture;
 	//temp
+	planetTexture.waterGradient = new Gradient();
 	planetTexture.biomes.reserve(3);
 	planetTexture.biomes.push_back(new Gradient());
 	planetTexture.biomes.push_back(new Gradient());
@@ -144,13 +145,18 @@ int main(void)
 			ImGui::NewLine();
 			ImGui::Checkbox("Continuos Update", &isContinousUpdate);
 			
-			/*
-			static float debugShaderFloat = 0.0f;
-			ImGui::SliderFloat("Debug Float",&debugShaderFloat, 0.0f, 1.0f);
-			shader.SetFloat(SHADER_UNIFORM::DEBUG_FLOAT, debugShaderFloat);
-			*/
+			
+		/*	static float debugShaderFloat = 0.0f;
+			if (ImGui::SliderFloat("Debug Float", &debugShaderFloat, -1.0f, 1.0f))
+			{
+				std::cout << debugShaderFloat << "\n";
+				planet.GetShader()->Bind();
+				planet.GetShader()->SetFloat(SHADER_UNIFORM::DEBUG_FLOAT, debugShaderFloat);
+				planet.GetShader()->Unbind();
+			}*/
+			
 			ImGui::NewLine();
-			ImGui::Text("Structure");
+			ImGui::Text("Terrain Settings");
 			if ( ImGui::Button("Generate")||(isContinousUpdate && counter >=60 && isEdited && !planet.IsBusy()))
 			{
 				planet.CreatePlanet(resolution, noiseSettings);
@@ -211,9 +217,13 @@ int main(void)
 			}
 
 			ImGui::NewLine();
-			ImGui::Text("Color");
+			ImGui::Text("Color Settings");
 			//Texture
 			bool isTextureEdited = false;
+			if (ImGui::CollapsingHeader("Water"))
+			{
+				isTextureEdited |= ImGui::GradientEditor(&planetTexture.waterGradient->gradient, planetTexture.waterGradient->draggingMark, planetTexture.waterGradient->selectedMark);
+			}
 			if (ImGui::Button("Add Biome"))
 			{
 				planetTexture.biomes.push_back(new Gradient());

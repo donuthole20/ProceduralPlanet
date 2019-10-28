@@ -158,6 +158,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="src\Debug.cpp" />
     <ClCompile Include="src\externallibs\imgui\imgui.cpp" />
     <ClCompile Include="src\externallibs\imgui\imgui_color_gradient.cpp" />
     <ClCompile Include="src\externallibs\imgui\imgui_demo.cpp" />
@@ -178,6 +179,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\ConfigMacros.h" />
+    <ClInclude Include="src\Debug.h" />
     <ClInclude Include="src\externallibs\imgui\imconfig.h" />
     <ClInclude Include="src\externallibs\imgui\imgui.h" />
     <ClInclude Include="src\externallibs\imgui\imgui_color_gradient.h" />
@@ -201,6 +203,7 @@
     <ClInclude Include="src\Window.h" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="res\shaders\Debug.Shader" />
     <None Include="res\shaders\Planet.shader" />
   </ItemGroup>
   <ItemGroup>

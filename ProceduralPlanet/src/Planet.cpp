@@ -81,10 +81,11 @@ void Planet::SetTexture(PlanetTexture& texture)
 {
 	if (!textureID)
 	{
-	//	glDeleteTextures(1, &textureID);
+	//	glDeleteTextures(1, &textureID);//TODO do you need to delete texture every time you make one?
 		glGenTextures(1, &textureID);
-		glBindTexture(GL_TEXTURE_2D, textureID);
 	}
+
+	glBindTexture(GL_TEXTURE_2D, textureID);
 
 	shader.Bind();
 	shader.SetInt(SHADER_UNIFORM::BIOMES_COUNT, texture.biomes.size());
@@ -100,17 +101,27 @@ void Planet::SetTexture(PlanetTexture& texture)
 		}
 		
 	}
-	unsigned int height = resolution * highestMarkCount;
-	unsigned int width = texture.biomes.size();
+	unsigned int height = texture.biomes.size();
+	unsigned int textureResolution = resolution * highestMarkCount;
+	unsigned int width = textureResolution * 2;
 	textureData.reserve((size_t)height * (size_t)width);
 	
 	for (int y = 0; y < height; y++)
 	{
-		double pos = (float)(y + 1) / (float)height;
 		for (int x = 0; x < width; x++)
 		{
+			
 			float color[3];
-			texture.biomes[x]->gradient.getColorAt(pos, color);
+			if (x < textureResolution-1)
+			{
+				double pos = (float)(x) / ((float)textureResolution-1);
+				texture.waterGradient->gradient.getColorAt(pos, color);
+			}
+			else
+			{
+				double pos = (float)(x-(textureResolution - 1))/ ((float)textureResolution - 1);
+				texture.biomes[y]->gradient.getColorAt(pos, color);
+			}
 			ImColor tintedColor = ImColor(color[0] * 255, color[1] * 255, color[2] * 255);
 			textureData.emplace_back(tintedColor.Value.x, tintedColor.Value.y, tintedColor.Value.z);
 		}
@@ -159,7 +170,7 @@ Planet::VerticesData* Planet::CreatePlanetSide(unsigned int resolution, std::vec
 					elevation += (noiseAmount * firstLayerValue);
 				}
 			}
-			elevation = 1 + elevation;
+			
 			
 			if (i==0)
 			{
@@ -176,8 +187,11 @@ Planet::VerticesData* Planet::CreatePlanetSide(unsigned int resolution, std::vec
 					elevationMinMax.y = elevation;
 				}
 			}
-			
-			data->vertices[i] = pointOnUnitSphere *elevation;
+
+			data->elevations[i] = elevation;
+			elevation = glm::max(0.0f, elevation);
+			elevation += 1;
+			data->position[i] = pointOnUnitSphere * elevation;
 
 			if (x != resolution - 1 && y != resolution - 1)
 			{
@@ -193,34 +207,31 @@ Planet::VerticesData* Planet::CreatePlanetSide(unsigned int resolution, std::vec
 		}
 	}
 
-	std::vector<glm::vec3> normals(data->vertices.size(), glm::vec3(0.0f));
+	
 	for (unsigned int i = 0; i < data->indices.size(); i += 3)
 	{
 		unsigned int in0 = data->indices[i];
 		unsigned int in1 = data->indices[i + 1];
 		unsigned int in2 = data->indices[i + 2];
-		glm::vec3 v1(data->vertices[in1] - data->vertices[in0]);
-		glm::vec3 v2(data->vertices[in2] - data->vertices[in0]);
+		glm::vec3 v1(data->position[in1] - data->position[in0]);
+		glm::vec3 v2(data->position[in2] - data->position[in0]);
 		glm::vec3 normal = glm::cross(v1, v2);
 		normal = glm::normalize(normal);
 
-		normals[in0] += normal;
-		normals[in1] += normal;
-		normals[in2] += normal;
+		data->normals[in0] += normal;
+		data->normals[in1] += normal;
+		data->normals[in2] += normal;
 	}
 
-	std::vector<glm::vec3> normalVector;
-	normalVector.reserve(data->vertices.size() * 2);
-	for (unsigned int i = 0; i < normals.size(); i++)
+	/*std::vector<glm::vec3> combinedVertexData;
+	combinedVertexData.reserve(data->position.size() * 2);
+	for (unsigned int i = 0; i < data->position.size(); i++)
 	{
-		normals[i] = normalize(normals[i]);
-		normalVector.emplace_back(data->vertices[i]);
-		normalVector.emplace_back(normalize(normals[i]));
-
+		combinedVertexData.emplace_back(data->position[i]);
+		combinedVertexData.emplace_back(glm::normalize(data->normals[i]));
 	}
-
-	data->vertices.clear();
-	data->vertices = normalVector;
+	data->position.clear();
+	data->position = combinedVertexData;*/
 
 	return data;
 }
@@ -231,14 +242,29 @@ Planet::GLIDs Planet::BindVertexData(Planet::VerticesData* vertices)
 	GLCall(glGenVertexArrays(1, &id.vertexArrayObjectID));
 	GLCall(glBindVertexArray(id.vertexArrayObjectID));
 
+	std::vector <float> combinedVertexData;
+	combinedVertexData.reserve((vertices->position.size() * 3 * 2) /*+ vertices->elevations.size()*/);
+	for (unsigned int i =0;i< vertices->position.size();i++)
+	{
+		combinedVertexData.emplace_back(vertices->position[i].x);
+		combinedVertexData.emplace_back(vertices->position[i].y);
+		combinedVertexData.emplace_back(vertices->position[i].z);
+		glm::vec3 normal = glm::normalize(vertices->normals[i]);
+		combinedVertexData.emplace_back(normal.x);
+		combinedVertexData.emplace_back(normal.y);
+		combinedVertexData.emplace_back(normal.z);
+		combinedVertexData.emplace_back(vertices->elevations[i]);
+	}
 	GLCall(glGenBuffers(1, &id.vertexBufferID));
 	GLCall(glBindBuffer(GL_ARRAY_BUFFER, id.vertexBufferID));
-	GLCall(glBufferData(GL_ARRAY_BUFFER, sizeof(float) * vertices->vertices.size() * 3, &vertices->vertices[0], GL_STATIC_DRAW));//size of array * 3 for 3 floats in a vertex
+	GLCall(glBufferData(GL_ARRAY_BUFFER, sizeof(float) * combinedVertexData.size(), &combinedVertexData[0], GL_STATIC_DRAW));//size of array * 3 for 3 floats in a vertex
 
-	GLCall(glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), 0));
+	GLCall(glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 7 * sizeof(float), 0));
 	GLCall(glEnableVertexAttribArray(0));
-	GLCall(glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)(sizeof(float) * 3)));
+	GLCall(glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 7 * sizeof(float), (void*)(sizeof(float) * 3)));
 	GLCall(glEnableVertexAttribArray(1));
+	GLCall(glVertexAttribPointer(2, 1, GL_FLOAT, GL_FALSE, 7 * sizeof(float), (void*)(sizeof(float) * 6)));
+	GLCall(glEnableVertexAttribArray(2));
 
 	GLCall(glBindBuffer(GL_ARRAY_BUFFER, 0));
 	GLCall(glBindVertexArray(0));

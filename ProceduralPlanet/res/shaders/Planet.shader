@@ -1,13 +1,15 @@
 #shader vertex
 #version 330 core
 
-layout(location = 0) in vec3 position;
-layout(location = 1) in vec3 normal;
+layout(location = 0) in vec3 l_position;
+layout(location = 1) in vec3 l_normal;
+layout(location = 2) in float l_elevation;
 
 out vec4 vCol;
 out float dist;
 out vec3 WorldPos;
 out vec3 Normal;
+out float elevation;
 
 out float biomePercent;
 
@@ -48,9 +50,9 @@ vec2 SineWave(vec2 p)
 void main()
 {
 
-	float heightPercent = (position.y + 1) / 2f;
+	float heightPercent = (l_position.y + 1) / 2f;
 	float biomeIndex = 0;
-	float blendRange = rand2D(position.xy) / 2 + 0.001f;
+	float blendRange = (rand2D(l_position.xy)*0.5) / 2 + 0.001f;
 	
 	
 	for (int i = 0; i < u_biomesCount; i++)
@@ -67,25 +69,25 @@ void main()
 		biomeIndex += i* weight;
 	}
 
-	biomePercent = biomeIndex / max(1,2);
+	biomePercent = biomeIndex / max(1, u_biomesCount-1);
 
 	//vCol = vec4(clamp(position,0.0f,1.0f),1.0f);
-	dist = distance(vec3(0.0), position.xyz);
+	dist = distance(vec3(0.0), l_position.xyz);
 	//dist =	length(position);
 	//gl_Position = projectionMatrix *  modelMatrix * viewMatrix * vec4(position,1.0f);
 
-	vec3 offset = normal;
+	vec3 offset = l_normal;
 	if (dist <= 1)
 	{
-		offset += vec3(SineWave(normal.xz),0.0);
+		offset += vec3(SineWave(l_normal.xz),0.0);
 	}
 	
 	
 	Normal = mat3(u_modelMatrix) * offset;
-	WorldPos = vec3(u_modelMatrix * vec4(position, 1.0));
+	WorldPos = vec3(u_modelMatrix * vec4(l_position, 1.0));
 	
 	//vCol = vec4(SineWave(position.xy),1.0,1.0);
-
+	elevation = l_elevation;
 	gl_Position = u_projectionMatrix * u_viewMatrix * vec4(WorldPos, 1.0);
 };
 
@@ -101,6 +103,7 @@ in vec3 Normal;
 in vec4 vCol;
 in float dist;
 in float biomePercent;
+in float elevation;
 
 uniform vec2 u_elevationMinMax;
 uniform sampler2D texture1;
@@ -179,12 +182,19 @@ void main()
 	float grey = 0.21 * vCol.r + 0.71 * vCol.g + 0.07 * vCol.b;
 	vec4 greyScale = vec4(vCol.rgb * (1.0 - 1) + (grey * 1), 1.0);
 
-	vec2 texCoord = vec2(biomePercent, elevationNormalized);
+	float waterElevation = map(elevation,u_elevationMinMax.x,0, 0, 0.5);
+	float terrainElevation = map(elevation,0, u_elevationMinMax.y, 0.5, 1);
+	float waterMask = floor(map(elevation,u_elevationMinMax.y,0,0, 1));
+	float terrainMask = floor(map(elevation, u_elevationMinMax.x, 0, 0, 1));
+	float elevationCombined = (terrainMask * terrainElevation) + (waterMask * waterElevation);
+
+	vec2 texCoord = vec2(elevationCombined,biomePercent);
 	vec4 gradient = texture(texture1, texCoord);
 	vec3 albedo = gradient.rgb * u_albedo;
+	//vec3 albedo = vec3((waterMask));
 
-	float metallic = (1 - elevationNormalized * 0.8)  * u_metallic;
-	float roughness = clamp((elevationNormalized+0.5),0.0,1.0) * u_roughness;
+	float metallic = (waterMask * (waterElevation + 0.5) + (terrainElevation / 4)) * u_metallic;
+	float roughness = ((terrainMask + 0.4) * terrainElevation ) * u_roughness;
 	float ao = u_ao;
 
 	vec3 N = normalize(Normal);

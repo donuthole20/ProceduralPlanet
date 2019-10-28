@@ -20,9 +20,11 @@ struct Gradient
 };
 struct PlanetTexture
 {
+	Gradient* waterGradient;
 	std::vector<Gradient*> biomes;
 	~PlanetTexture()
 	{
+		delete waterGradient;
 		for (size_t i = 0; i < biomes.size(); i++)
 		{
 			delete biomes[i];
@@ -35,11 +37,15 @@ class Planet
 private:
 	struct VerticesData
 	{
-		std::vector<glm::vec3> vertices;
+		std::vector<glm::vec3> position;
+		std::vector<glm::vec3> normals;
+		std::vector<float> elevations;
 		std::vector<unsigned int> indices;
 		VerticesData(unsigned int resolution)
 		{
-			vertices = std::vector<glm::vec3>(resolution * resolution, glm::vec3(0, 0, 0));
+			position = std::vector<glm::vec3>(resolution * resolution, glm::vec3(0, 0, 0));
+			normals = std::vector<glm::vec3>(resolution * resolution, glm::vec3(0, 0, 0));
+			elevations = std::vector<float>(resolution * resolution, 0.0f);
 			indices = std::vector<unsigned int>(((resolution - 1) * (resolution - 1) * 6), 0);
 		}
 	};

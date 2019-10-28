@@ -43,7 +43,7 @@ public:
 					amplitude *= persistence;
 				}
 
-				noiseAmount = glm::max(0.0f, noiseAmount - minValue);
+				noiseAmount =  noiseAmount - minValue;
 				noiseAmount *= strength;
 				return noiseAmount;
 			}
@@ -64,7 +64,7 @@ public:
 					amplitude *= persistence;
 				}
 
-				noiseAmount = glm::max(0.0f, noiseAmount - minValue);
+				noiseAmount = noiseAmount - minValue;
 				noiseAmount *= strength;
 				return noiseAmount;
 			}

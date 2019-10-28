@@ -66,6 +66,9 @@
     <ClCompile Include="src\externallibs\imgui\imgui_color_gradient.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\Debug.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\OpenGLErrorHandler.h">
@@ -134,9 +137,13 @@
     <ClInclude Include="src\externallibs\imgui\imgui_color_gradient.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="src\Debug.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="res\shaders\Planet.shader" />
+    <None Include="res\shaders\Debug.Shader" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="res\back.txt" />
