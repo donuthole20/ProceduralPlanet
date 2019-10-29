@@ -145,7 +145,4 @@
     <None Include="res\shaders\Planet.shader" />
     <None Include="res\shaders\Debug.Shader" />
   </ItemGroup>
-  <ItemGroup>
-    <Text Include="res\back.txt" />
-  </ItemGroup>
 </Project>

@@ -134,7 +134,7 @@ int main(void)
 		planet.SetShaderTime(window.GetCurrentTime());
 		
 		{
-			ImGui::SetNextWindowSize(ImVec2(500, 400), ImGuiCond_FirstUseEver);
+			ImGui::SetNextWindowSize(ImVec2(500, 900), ImGuiCond_FirstUseEver);
 			ImGui::Begin("Settings", NULL,window_flags);
 			if (isContinousUpdate)
 			{
