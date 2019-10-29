@@ -101,9 +101,9 @@
       <AdditionalDependencies>glfw3.lib;opengl32.lib;user32.lib;Gdi32.lib;Shell32.lib;glew32s.lib</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
-      <Command>xcopy res $(SolutionDir)Bin\$(ProjectName)\$(Platform)\$(Configuration)\res\ /s
-xcopy res $(SolutionDir)Bin\Tools\Serializer\ /s
-xcopy res $(SolutionDir)\Serializer\UnserializedRes\ /s</Command>
+      <Command>xcopy res $(SolutionDir)Bin\$(ProjectName)\$(Platform)\$(Configuration)\res\ /s /y
+xcopy res $(SolutionDir)Bin\Tools\Serializer\UnserializedRes\ /s /y
+xcopy res $(SolutionDir)Serializer\UnserializedRes\ /s /y</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -122,9 +122,9 @@ xcopy res $(SolutionDir)\Serializer\UnserializedRes\ /s</Command>
       <AdditionalDependencies>glfw3.lib;opengl32.lib;user32.lib;Gdi32.lib;Shell32.lib;glew32s.lib</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
-      <Command>xcopy res $(SolutionDir)Bin\$(ProjectName)\$(Platform)\$(Configuration)\res\ /s
-xcopy res $(SolutionDir)Bin\Tools\Serializer\ /s
-xcopy res $(SolutionDir)\Serializer\UnserializedRes\ /s</Command>
+      <Command>xcopy res $(SolutionDir)Bin\$(ProjectName)\$(Platform)\$(Configuration)\res\ /s /y
+xcopy res $(SolutionDir)Bin\Tools\Serializer\UnserializedRes\ /s /y
+xcopy res $(SolutionDir)Serializer\UnserializedRes\ /s /y</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -147,9 +147,9 @@ xcopy res $(SolutionDir)\Serializer\UnserializedRes\ /s</Command>
       <AdditionalDependencies>glfw3.lib;opengl32.lib;user32.lib;Gdi32.lib;Shell32.lib;glew32s.lib</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
-      <Command>xcopy res $(SolutionDir)Bin\$(ProjectName)\$(Platform)\$(Configuration)\res\ /s
-xcopy res $(SolutionDir)Bin\Tools\Serializer\ /s
-xcopy res $(SolutionDir)\Serializer\UnserializedRes\ /s</Command>
+      <Command>xcopy res $(SolutionDir)Bin\$(ProjectName)\$(Platform)\$(Configuration)\res\ /s /y
+xcopy res $(SolutionDir)Bin\Tools\Serializer\UnserializedRes\ /s /y
+xcopy res $(SolutionDir)Serializer\UnserializedRes\ /s /y</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -172,9 +172,9 @@ xcopy res $(SolutionDir)\Serializer\UnserializedRes\ /s</Command>
       <AdditionalDependencies>glfw3.lib;opengl32.lib;user32.lib;Gdi32.lib;Shell32.lib;glew32s.lib</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
-      <Command>xcopy res $(SolutionDir)Bin\$(ProjectName)\$(Platform)\$(Configuration)\res\ /s
-xcopy res $(SolutionDir)Bin\Tools\Serializer\ /s
-xcopy res $(SolutionDir)\Serializer\UnserializedRes\ /s</Command>
+      <Command>xcopy res $(SolutionDir)Bin\$(ProjectName)\$(Platform)\$(Configuration)\res\ /s /y
+xcopy res $(SolutionDir)Bin\Tools\Serializer\UnserializedRes\ /s /y
+xcopy res $(SolutionDir)Serializer\UnserializedRes\ /s /y</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
