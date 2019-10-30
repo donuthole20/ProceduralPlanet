@@ -142,7 +142,7 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <None Include="res\shaders\Planet.shader" />
-    <None Include="res\shaders\Debug.Shader" />
+    <None Include="res\unserialized\shaders\Debug.Shader" />
+    <None Include="res\unserialized\shaders\Planet.shader" />
   </ItemGroup>
 </Project>

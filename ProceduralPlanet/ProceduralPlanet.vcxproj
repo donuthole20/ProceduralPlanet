@@ -101,9 +101,9 @@
       <AdditionalDependencies>glfw3.lib;opengl32.lib;user32.lib;Gdi32.lib;Shell32.lib;glew32s.lib</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
-      <Command>xcopy res $(SolutionDir)Bin\$(ProjectName)\$(Platform)\$(Configuration)\res\ /s /y
-xcopy res $(SolutionDir)Bin\Tools\Serializer\UnserializedRes\ /s /y
-xcopy res $(SolutionDir)Serializer\UnserializedRes\ /s /y</Command>
+      <Command>call $(SolutionDir)Bin\Tools\Serializer\Serializer.exe
+xcopy res\serialized $(SolutionDir)Bin\$(ProjectName)\$(Platform)\$(Configuration)\res\serialized\ /s /y
+xcopy res\unserialized $(SolutionDir)Serializer\res\unserialized\ /s /y</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -122,9 +122,9 @@ xcopy res $(SolutionDir)Serializer\UnserializedRes\ /s /y</Command>
       <AdditionalDependencies>glfw3.lib;opengl32.lib;user32.lib;Gdi32.lib;Shell32.lib;glew32s.lib</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
-      <Command>xcopy res $(SolutionDir)Bin\$(ProjectName)\$(Platform)\$(Configuration)\res\ /s /y
-xcopy res $(SolutionDir)Bin\Tools\Serializer\UnserializedRes\ /s /y
-xcopy res $(SolutionDir)Serializer\UnserializedRes\ /s /y</Command>
+      <Command>call $(SolutionDir)Bin\Tools\Serializer\Serializer.exe
+xcopy res\serialized $(SolutionDir)Bin\$(ProjectName)\$(Platform)\$(Configuration)\res\serialized\ /s /y
+xcopy res\unserialized $(SolutionDir)Serializer\res\unserialized\ /s /y</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -147,9 +147,9 @@ xcopy res $(SolutionDir)Serializer\UnserializedRes\ /s /y</Command>
       <AdditionalDependencies>glfw3.lib;opengl32.lib;user32.lib;Gdi32.lib;Shell32.lib;glew32s.lib</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
-      <Command>xcopy res $(SolutionDir)Bin\$(ProjectName)\$(Platform)\$(Configuration)\res\ /s /y
-xcopy res $(SolutionDir)Bin\Tools\Serializer\UnserializedRes\ /s /y
-xcopy res $(SolutionDir)Serializer\UnserializedRes\ /s /y</Command>
+      <Command>call $(SolutionDir)Bin\Tools\Serializer\Serializer.exe
+xcopy res\serialized $(SolutionDir)Bin\$(ProjectName)\$(Platform)\$(Configuration)\res\serialized\ /s /y
+xcopy res\unserialized $(SolutionDir)Serializer\res\unserialized\ /s /y</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -172,9 +172,9 @@ xcopy res $(SolutionDir)Serializer\UnserializedRes\ /s /y</Command>
       <AdditionalDependencies>glfw3.lib;opengl32.lib;user32.lib;Gdi32.lib;Shell32.lib;glew32s.lib</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
-      <Command>xcopy res $(SolutionDir)Bin\$(ProjectName)\$(Platform)\$(Configuration)\res\ /s /y
-xcopy res $(SolutionDir)Bin\Tools\Serializer\UnserializedRes\ /s /y
-xcopy res $(SolutionDir)Serializer\UnserializedRes\ /s /y</Command>
+      <Command>call $(SolutionDir)Bin\Tools\Serializer\Serializer.exe
+xcopy res\serialized $(SolutionDir)Bin\$(ProjectName)\$(Platform)\$(Configuration)\res\serialized\ /s /y
+xcopy res\unserialized $(SolutionDir)Serializer\res\unserialized\ /s /y</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
@@ -223,8 +223,8 @@ xcopy res $(SolutionDir)Serializer\UnserializedRes\ /s /y</Command>
     <ClInclude Include="src\Window.h" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="res\shaders\Debug.Shader" />
-    <None Include="res\shaders\Planet.shader" />
+    <None Include="res\unserialized\shaders\Debug.Shader" />
+    <None Include="res\unserialized\shaders\Planet.shader" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
