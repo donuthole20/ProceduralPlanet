@@ -1,0 +1,93 @@
+#version 330 core
+
+layout(location = 0) in vec3 l_position;
+layout(location = 1) in vec3 l_normal;
+layout(location = 2) in float l_elevation;
+
+out vec4 vCol;
+out float dist;
+out vec3 WorldPos;
+out vec3 Normal;
+out float elevation;
+
+out float biomePercent;
+
+uniform mat4 u_projectionMatrix;
+uniform mat4 u_viewMatrix;
+uniform mat4 u_modelMatrix;
+
+
+uniform int u_biomesCount;
+
+uniform float u_time;
+
+float InverseLerp(float value, float min, float max);
+
+float InverseLerp(float value, float min, float max) 
+{
+	return ((value - min)) / (max - min);
+}
+
+float rand2D( vec2 co);
+float rand2D( vec2 co) 
+{
+	return fract(sin(dot(co.xy, vec2(12.9898, 78.233))) * 43758.5453);
+}
+
+vec2 SineWave(vec2 p);
+vec2 SineWave(vec2 p)
+{
+	// convert Vertex position <-1,+1> to texture coordinate <0,1> and some shrinking so the effect dont overlap screen
+	p.x = (0.55 * p.x) + 0.5;
+	p.y = (-0.55 * p.y) + 0.5;
+	// wave distortion
+	float x = sin(250.0 * p.y + 300.0 * p.x + 4 * u_time) * 0.05;
+	float y = sin(250.0 * p.y + 300.0 * p.x + 4 * u_time) * 0.05;
+	return vec2(p.x + x, p.y + y);
+}
+
+void main()
+{
+
+	float heightPercent = (l_position.y + 1) / 2f;
+	float biomeIndex = 0;
+	float blendRange = (rand2D(l_position.xy)*0.5) / 2 + 0.001f;
+	
+	
+	for (int i = 0; i < u_biomesCount; i++)
+	{
+		int multiplier = i;
+		if (i > 0)
+		{
+			multiplier = i + (i - 1);
+		}
+		float dst = heightPercent - 0.25 * multiplier;
+		
+		float weight = clamp(InverseLerp(dst,-blendRange, blendRange),0,1);
+		biomeIndex *= (1-weight);
+		biomeIndex += i* weight;
+	}
+
+	biomePercent = biomeIndex / max(1, u_biomesCount-1);
+
+	//vCol = vec4(clamp(position,0.0f,1.0f),1.0f);
+	dist = distance(vec3(0.0), l_position.xyz);
+	//dist =	length(position);
+	//gl_Position = projectionMatrix *  modelMatrix * viewMatrix * vec4(position,1.0f);
+
+	vec3 offset = l_normal;
+	if (dist <= 1)
+	{
+		offset += vec3(SineWave(l_normal.xz),0.0);
+	}
+	
+	
+	Normal = mat3(u_modelMatrix) * offset;
+	WorldPos = vec3(u_modelMatrix * vec4(l_position, 1.0));
+	
+	//vCol = vec4(SineWave(position.xy),1.0,1.0);
+	elevation = l_elevation;
+	gl_Position = u_projectionMatrix * u_viewMatrix * vec4(WorldPos, 1.0);
+};
+
+

@@ -7,7 +7,7 @@
 
 Planet::Planet() :
 	isBusy(false),
-	shader(Shader("res/shaders/Planet.shader"))
+	shader(Shader("Planet.shader"))
 {
 	meshGLIDs.reserve(6);
 	directions.reserve(6);

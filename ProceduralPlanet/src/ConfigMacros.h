@@ -8,3 +8,5 @@
 #elif defined(DEBUG)
 	#define ENABLE_LOG 1
 #endif 
+
+#define USE_SERIALIZED_ASSETS 0//meh not working
