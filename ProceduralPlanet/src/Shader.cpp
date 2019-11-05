@@ -12,92 +12,8 @@
 #include "ConfigMacros.h"
 
 
-Shader::Shader(const char* filename)
+Shader::Shader(const char* filename, PreCompileShaderVariable preCompiledVariables)
 {
-#if USE_SERIALIZED_ASSETS
-	std::string stringFilePath = std::string(filename);
-	stringFilePath = stringFilePath.substr(0, stringFilePath.find_last_of("."));
-
-	char* vertexShaderSrc = nullptr;
-	char* fragmentShaderSrc = nullptr;
-
-	for (auto& shader : std::filesystem::directory_iterator("res/serialized/shaders"))
-	{
-		if (!shader.exists())
-		{
-			std::string error = "Cannot open shader:" + shader.path().string();
-			Log::LogError(error);
-		}
-		std::string stringDirFilePath = shader.path().string();
-		if (stringDirFilePath.find(stringFilePath) != std::string::npos )
-		{
-			std::string dirFilePathWithType = stringDirFilePath;
-			
-			stringDirFilePath = stringDirFilePath.substr(stringDirFilePath.find_last_of("\\")+1, stringDirFilePath.find("_"));
-			stringDirFilePath = stringDirFilePath.substr(0, stringDirFilePath.find("_"));
-			
-			std::ifstream reader;
-			reader.open(shader.path().c_str(), std::ios::binary | std::ios::in);
-			if (!reader.is_open())
-			{
-				std::string error = "Cannot read shader:" + shader.path().string();
-				Log::LogError(error);
-			}
-
-			size_t filesize = shader.file_size();
-		
-
-			if (dirFilePathWithType.find("vertex") != std::string::npos)
-			{
-				if (vertexShaderSrc == nullptr)
-				{
-					vertexShaderSrc = new char[filesize];
-					reader.read(vertexShaderSrc, filesize);
-				}
-			}
-			
-			if (dirFilePathWithType.find("fragment") != std::string::npos)
-			{
-				if (fragmentShaderSrc == nullptr)
-				{
-					fragmentShaderSrc = new char[filesize];
-					reader.read(fragmentShaderSrc, filesize);
-				}
-			}
-
-			reader.close();
-		
-
-		}
-
-	}
-
-	shaderProgramID = glCreateProgram();
-	unsigned int vertexShaderID;
-	if (vertexShaderSrc != nullptr)
-	{
-		vertexShaderID = CompileShader(GL_VERTEX_SHADER, vertexShaderSrc);
-		delete vertexShaderSrc;
-	}
-	else
-	{
-		return;
-	}
-
-
-	unsigned int fragmentShaderID;
-	if (fragmentShaderSrc != nullptr)
-	{
-		fragmentShaderID = CompileShader(GL_FRAGMENT_SHADER, fragmentShaderSrc);
-		delete fragmentShaderSrc;
-	}
-	else
-	{
-		return;
-	}
-
-	
-#else
 	//Parsing
 	std::string filepath = "res/unserialized/shaders/" + std::string(filename);
 	std::ifstream stream(filepath);
@@ -114,6 +30,8 @@ Shader::Shader(const char* filename)
 	ShaderTypeParseMode parseMode = ShaderTypeParseMode::NONE;
 	while (std::getline(stream,line))
 	{
+		
+		
 		if (line.find("#shader") != std::string::npos)
 		{
 			if (line.find("vertex") != std::string::npos)
@@ -127,13 +45,18 @@ Shader::Shader(const char* filename)
 		}
 		else
 		{
+			//Note: Pre compile variables
+			if (line.find("#PCV_LightCount") != std::string::npos)
+			{
+				line.replace(line.find("#PCV_LightCount"), 15, std::to_string(preCompiledVariables.lightCount));
+			}
+
 			shaderSourceStrings[(int)parseMode] << line << "\n";
 		}
 	}
 	stream.close();
 	unsigned int vertexShaderID = CompileShader(GL_VERTEX_SHADER, shaderSourceStrings[0].str().c_str());
 	unsigned int fragmentShaderID = CompileShader(GL_FRAGMENT_SHADER, shaderSourceStrings[1].str().c_str());
-#endif
 
 	shaderProgramID = glCreateProgram();
 	GLCall(glAttachShader(shaderProgramID, vertexShaderID));

@@ -117,8 +117,8 @@ uniform float u_roughness;
 uniform float u_ao;
 
 // lights
-uniform vec3 u_lightPositions[1];
-uniform vec3 u_lightColors[1];
+uniform vec3 u_lightPositions[#PCV_LightCount];
+uniform vec3 u_lightColors[#PCV_LightCount];
 
 uniform vec3 u_camPos;
 
@@ -205,7 +205,7 @@ void main()
 
 	// reflectance equation
 	vec3 Lo = vec3(0.0);
-	for (int i = 0; i < 1; ++i)//NOTE:Change when adding light
+	for (int i = 0; i < #PCV_LightCount; ++i)//NOTE:Change when adding light
 	{
 		// calculate per-light radiance
 		vec3 L = normalize(u_lightPositions[i] - WorldPos);

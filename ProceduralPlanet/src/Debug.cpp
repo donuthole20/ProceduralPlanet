@@ -6,7 +6,8 @@
 
 void Debug::DrawTextureWithoutPadding(std::vector<glm::lowp_u8vec3> textureData,float height, float width)
 {
-	Shader shader = Shader("res/shaders/Debug.shader");
+	PreCompileShaderVariable variables = PreCompileShaderVariable(1);
+	Shader shader = Shader("res/shaders/Debug.shader", variables);
 	shader.Bind();
 
 	float vertices[] = 

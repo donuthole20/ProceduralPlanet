@@ -21,6 +21,14 @@ enum class SHADER_UNIFORM
 	DEBUG_FLOAT
 };
 
+struct PreCompileShaderVariable
+{
+	unsigned int lightCount;
+	PreCompileShaderVariable(unsigned int vlightCount)
+		:lightCount(vlightCount)
+	{}
+};
+
 class Shader
 {
 private:
@@ -32,7 +40,7 @@ private:
 	void AddUniformID(SHADER_UNIFORM uniform, const char* uniformName);
 public:
 	~Shader();
-	Shader(const char* filepath);
+	Shader(const char* filepath, PreCompileShaderVariable lightSettings);
 	void Bind();
 	void Unbind();
 	void DeleteShader();
