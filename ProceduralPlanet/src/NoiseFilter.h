@@ -77,7 +77,17 @@ public:
 	{
 		baseRoughness = 0.7f + static_cast <float> (rand()) / (static_cast <float> (RAND_MAX / (1.5f - 0.7f)));
 		strength = 0.1f + static_cast <float> (rand()) / (static_cast <float> (RAND_MAX / (0.3f - 0.1f)));
-		roughness = 2.0f + static_cast <float> (rand()) / (static_cast <float> (RAND_MAX / (3.0f - 2.0f)));
+		roughness = 2.0f + static_cast <float> (rand()) / (static_cast <float> (RAND_MAX / (3.0f - 2.2f)));
+		switch (type)
+		{
+			case NoiseType::Simple:
+				minValue = 1.0f + static_cast <float> (rand()) / (static_cast <float> (RAND_MAX / (1.3f - 1.0f)));
+				break;
+			case NoiseType::Rigid:
+				minValue = 0.3f + static_cast <float> (rand()) / (static_cast <float> (RAND_MAX / (0.4f - 0.3f)));
+				break;
+		}
+		
 	}
 };
 class INoiseSettings

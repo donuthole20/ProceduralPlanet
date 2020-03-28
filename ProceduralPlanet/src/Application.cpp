@@ -54,7 +54,7 @@ int main(void)
 		//noiseSettings[0].roughness = 2.2f;
 		noiseSettings[0].persistence = 0.5f;
 		noiseSettings[0].center = glm::vec3(1.11f,0.92f,-0.39f);
-		noiseSettings[0].minValue = 0.98f;
+		//noiseSettings[0].minValue = 0.98f;
 
 		noiseSettings.emplace_back();
 		noiseSettings[1].type = NoiseType::Simple;
@@ -64,7 +64,7 @@ int main(void)
 		//noiseSettings[1].roughness = 2.34f;
 		noiseSettings[1].persistence = 0.5f;
 		noiseSettings[1].center = glm::vec3(0.0f);
-		noiseSettings[1].minValue = 1.25f;
+		//noiseSettings[1].minValue = 1.25f;
 		
 		noiseSettings.emplace_back();
 		noiseSettings[2].type = NoiseType::Rigid;
@@ -154,7 +154,7 @@ int main(void)
 			if (planet.IsBusy())
 			{
 				ImGui::NewLine();
-				ImGui::Text("Loading....");
+				ImGui::Text("Generating Planet....");
 			}
 
 			ImGui::NewLine();
