@@ -151,8 +151,21 @@ int main(void)
 			ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
 			ImGui::Text("Triangle count: %d", planet.GetTriCount());//TODO: store this
 			
+			if (planet.IsBusy())
+			{
+				ImGui::NewLine();
+				ImGui::Text("Loading....");
+			}
+
 			ImGui::NewLine();
 			ImGui::Checkbox("Continuos Update", &isContinousUpdate);
+			if (ImGui::Button("Generate") || (isContinousUpdate && counter >= 60 && isEdited && !planet.IsBusy()))
+			{
+				planet.CreatePlanet(resolution, noiseSettings);
+				planet.SetTexture(planetTexture);//Note: to resize texture
+				isEdited = false;
+				counter = 0;
+			}
 
 			ImGui::NewLine();
 			if (ImGui::Button("Randomize Planet"))
@@ -182,13 +195,7 @@ int main(void)
 			
 			ImGui::NewLine();
 			ImGui::Text("Terrain Settings");
-			if ( ImGui::Button("Generate")||(isContinousUpdate && counter >=60 && isEdited && !planet.IsBusy()))
-			{
-				planet.CreatePlanet(resolution, noiseSettings);
-				planet.SetTexture(planetTexture);//Note: to resize texture
-				isEdited = false;
-				counter = 0;
-			}
+		
 			isEdited |= ImGui::SliderInt("Resolution", (int*)(&resolution), 2, 1000);
 
 			ImGui::Combo(std::string("Type").c_str(), &selectedNoiseTypeCombo, NoiseTypeString, IM_ARRAYSIZE(NoiseTypeString));
