@@ -105,6 +105,7 @@ int main(void)
 	int counter = 0;
 	bool isContinousUpdate = true;
 	bool isEdited = false;
+	bool isTextureEdited = false;
 	int selectedNoiseTypeCombo = 0;
 
 
@@ -152,7 +153,23 @@ int main(void)
 			
 			ImGui::NewLine();
 			ImGui::Checkbox("Continuos Update", &isContinousUpdate);
-			
+
+			ImGui::NewLine();
+			if (ImGui::Button("Randomize Planet"))
+			{
+				isEdited |= true;
+				for (unsigned int i = 0; i < noiseSettings.size(); i++)
+				{
+					noiseSettings[i].Randomize();
+				}
+
+				isTextureEdited |= true;
+				planetTexture.waterGradient->Randomize();
+				for (int i = (planetTexture.biomes.size() - 1); i >= 0; --i)
+				{
+					planetTexture.biomes[i]->Randomize();
+				}
+			}
 			
 		/*	static float debugShaderFloat = 0.0f;
 			if (ImGui::SliderFloat("Debug Float", &debugShaderFloat, -1.0f, 1.0f))
@@ -176,10 +193,20 @@ int main(void)
 
 			ImGui::Combo(std::string("Type").c_str(), &selectedNoiseTypeCombo, NoiseTypeString, IM_ARRAYSIZE(NoiseTypeString));
 			ImGui::SameLine();
+
 			if (ImGui::Button("Add Noise"))
 			{
 				noiseSettings.emplace_back();
 				noiseSettings[noiseSettings.size()-1].type = (NoiseType)selectedNoiseTypeCombo;
+				isEdited |= true;
+			}
+
+			if (ImGui::Button("Randomize All Noise"))
+			{
+				for (unsigned int i = 0; i < noiseSettings.size(); i++)
+				{
+					noiseSettings[i].Randomize();
+				}
 				isEdited |= true;
 			}
 
@@ -209,6 +236,12 @@ int main(void)
 							break;
 						}
 					}
+
+					if(ImGui::Button(std::string("Randomize Noise " + index).c_str()))
+					{
+						noiseSettings[i].Randomize();
+					}
+
 					isEdited |= ImGui::Combo(std::string("Type###1" + index).c_str(),(int*)&noiseSettings[i].type, NoiseTypeString, IM_ARRAYSIZE(NoiseTypeString));
 					isEdited |=ImGui::SliderInt(std::string("Number of Iteration###1" + index).c_str(), (int*)&noiseSettings[i].numberOfLayers, 1, 10);
 					isEdited |=ImGui::SliderFloat(std::string("Base Roughness###2" + index).c_str(), &noiseSettings[i].baseRoughness, 0.0f, 5.0f);
@@ -226,11 +259,28 @@ int main(void)
 			}
 
 			ImGui::NewLine();
+		
+
 			ImGui::Text("Color Settings");
 			//Texture
-			bool isTextureEdited = false;
+		
+			if (ImGui::Button("Randomize All Color"))
+			{
+				isTextureEdited |= true;
+				planetTexture.waterGradient->Randomize();
+				for (int i = (planetTexture.biomes.size() - 1); i >= 0; --i)
+				{
+					planetTexture.biomes[i]->Randomize();
+				}
+			}
 			if (ImGui::CollapsingHeader("Water"))
 			{
+				if (ImGui::Button("Randomize Water"))
+				{
+					planetTexture.waterGradient->Randomize();
+					isTextureEdited |= true;
+				}
+
 				isTextureEdited |= ImGui::GradientEditor(&planetTexture.waterGradient->gradient, planetTexture.waterGradient->draggingMark, planetTexture.waterGradient->selectedMark);
 			}
 			if (ImGui::Button("Add Biome"))
@@ -243,6 +293,12 @@ int main(void)
 				std::string header = "Biome " + std::to_string(planetTexture.biomes.size()-i)+ "###"+ std::to_string(i);
 				if ((ImGui::CollapsingHeader(header.c_str())))
 				{
+					if (ImGui::Button(std::string("Randomize biome " + i).c_str()))
+					{
+						planetTexture.biomes[i]->Randomize();
+						isTextureEdited |= true;
+					}
+
 					if (planetTexture.biomes.size() > 2)
 					{
 						if (ImGui::Button(std::string("Delete###Biome" + std::to_string(i)).c_str()))
@@ -253,6 +309,7 @@ int main(void)
 							break;
 						}
 					}
+				
 					isTextureEdited |= ImGui::GradientEditor(&planetTexture.biomes[i]->gradient, planetTexture.biomes[i]->draggingMark, planetTexture.biomes[i]->selectedMark);
 				}
 				else
