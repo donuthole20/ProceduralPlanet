@@ -5,6 +5,9 @@
 #include <gtc/matrix_transform.hpp>
 #include <future>
 #include <thread>
+#include <cstdlib>
+#include <time.h>
+#include <algorithm> 
 
 
 #include "ConfigMacros.h"
@@ -33,29 +36,32 @@ int main(void)
 	ShowWindow( GetConsoleWindow(), SW_HIDE );
 #endif 
 
+	srand((unsigned)time(NULL));
+
+
 	Window window = Window(1366, 768);
 	
-	unsigned int resolution = 50;
+	unsigned int resolution = 100;
 
 	std::vector<NoiseSettings> noiseSettings;
 
 	{
 		noiseSettings.emplace_back();
 		noiseSettings[0].type = NoiseType::Simple;
-		noiseSettings[0].strength = 0.15f;
+		//noiseSettings[0].strength = 0.15f;
 		noiseSettings[0].numberOfLayers = 4;
-		noiseSettings[0].baseRoughness = 1.15f;
-		noiseSettings[0].roughness = 2.2f;
+		//noiseSettings[0].baseRoughness = 1.15f;
+		//noiseSettings[0].roughness = 2.2f;
 		noiseSettings[0].persistence = 0.5f;
 		noiseSettings[0].center = glm::vec3(1.11f,0.92f,-0.39f);
 		noiseSettings[0].minValue = 0.98f;
 
 		noiseSettings.emplace_back();
 		noiseSettings[1].type = NoiseType::Simple;
-		noiseSettings[1].strength = 0.36f;
+		//noiseSettings[1].strength = 0.36f;
 		noiseSettings[1].numberOfLayers = 5;
-		noiseSettings[1].baseRoughness = 1.08f;
-		noiseSettings[1].roughness = 2.34f;
+		//noiseSettings[1].baseRoughness = 1.08f;
+		//noiseSettings[1].roughness = 2.34f;
 		noiseSettings[1].persistence = 0.5f;
 		noiseSettings[1].center = glm::vec3(0.0f);
 		noiseSettings[1].minValue = 1.25f;
@@ -104,11 +110,12 @@ int main(void)
 
 	PlanetTexture planetTexture;
 	//temp
-	planetTexture.waterGradient = new Gradient();
+	planetTexture.waterGradient = new PlanetGradient();
+
 	planetTexture.biomes.reserve(3);
-	planetTexture.biomes.push_back(new Gradient());
-	planetTexture.biomes.push_back(new Gradient());
-	planetTexture.biomes.push_back(new Gradient());
+	planetTexture.biomes.push_back(new PlanetGradient());
+	planetTexture.biomes.push_back(new PlanetGradient());
+	planetTexture.biomes.push_back(new PlanetGradient());
 	
 	planet.SetTexture(planetTexture);
 	/* Loop until the user closes the window */
@@ -228,7 +235,7 @@ int main(void)
 			}
 			if (ImGui::Button("Add Biome"))
 			{
-				planetTexture.biomes.push_back(new Gradient());
+				planetTexture.biomes.push_back(new PlanetGradient());
 			}
 
 			for (int i = (planetTexture.biomes.size() - 1); i >= 0; --i)
@@ -240,7 +247,7 @@ int main(void)
 					{
 						if (ImGui::Button(std::string("Delete###Biome" + std::to_string(i)).c_str()))
 						{
-							Gradient* toBeDeleted = planetTexture.biomes[i];
+							PlanetGradient* toBeDeleted = planetTexture.biomes[i];
 							planetTexture.biomes.erase(planetTexture.biomes.begin() + i);
 							delete toBeDeleted;
 							break;

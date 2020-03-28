@@ -1,7 +1,7 @@
 #pragma once
 
-//#include <random>
-//#include <time.h>  
+#include <cstdlib>
+#include <time.h>  
 #include "Noise.h"
 
 enum class NoiseType
@@ -18,9 +18,9 @@ public:
 	{
 	}
 	size_t numberOfLayers = 1;
-	float baseRoughness = 1;
-	float strength = 1;
-	float roughness = 2;
+	float baseRoughness = 0.7f + static_cast <float> (rand()) / (static_cast <float> (RAND_MAX / (1.5f - 0.7f)));
+	float strength = 0.1f + static_cast <float> (rand()) / (static_cast <float> (RAND_MAX / (0.3f - 0.1f)));
+	float roughness = 2.0f + static_cast <float> (rand()) / (static_cast <float> (RAND_MAX / (3.0f - 2.0f)));
 	float persistence = 0.5f;
 	glm::vec3 center;
 	float minValue = 1.0f;

@@ -12,16 +12,37 @@
 
 
 
-struct Gradient
+struct PlanetGradient
 {
 	ImGradient gradient;
 	ImGradientMark* draggingMark = nullptr;
 	ImGradientMark* selectedMark = nullptr;
+	PlanetGradient()
+	{
+		std::list<ImGradientMark*> waterMarks = gradient.getMarks();
+		ImGradientMark* firstMark = waterMarks.back();
+		ImGradientMark* SecondMark = waterMarks.front();
+
+
+		firstMark->color[0] = std::max(0.0f, static_cast <float> (rand()) / static_cast <float> (RAND_MAX) - 0.2f);
+		firstMark->color[1] = std::max(0.0f, static_cast <float> (rand()) / static_cast <float> (RAND_MAX) - 0.2f);
+		firstMark->color[2] = std::max(0.0f, static_cast <float> (rand()) / static_cast <float> (RAND_MAX) - 0.2f);
+		firstMark->color[3] = 1.0f;
+
+
+		SecondMark->color[0] = static_cast <float> (rand()) / static_cast <float> (RAND_MAX);
+		SecondMark->color[1] = static_cast <float> (rand()) / static_cast <float> (RAND_MAX);
+		SecondMark->color[2] = static_cast <float> (rand()) / static_cast <float> (RAND_MAX);
+		SecondMark->color[3] = 1.0f;
+
+		gradient.refreshCache();
+	}
+	//TODO: Make this random
 };
 struct PlanetTexture
 {
-	Gradient* waterGradient;
-	std::vector<Gradient*> biomes;
+	PlanetGradient* waterGradient;
+	std::vector<PlanetGradient*> biomes;
 	~PlanetTexture()
 	{
 		delete waterGradient;

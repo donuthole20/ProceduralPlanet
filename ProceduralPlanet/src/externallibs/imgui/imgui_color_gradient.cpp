@@ -12,11 +12,20 @@ static const float GRADIENT_BAR_WIDGET_HEIGHT = 25;
 static const float GRADIENT_BAR_EDITOR_HEIGHT = 40;
 static const float GRADIENT_MARK_DELETE_DIFFY = 40;
 
+ImGradient::ImGradient(std::vector<ImGradientMark> marks)
+{
+	for (ImGradientMark mark : marks)
+	{
+		addMark(mark.position, ImColor(mark.color[0], mark.color[1], mark.color[2], mark.color[3]));
+	}
+}
+
 ImGradient::ImGradient()
 {
-	//addMark(0.0f, ImColor(1.0f, 1.0f, 1.0f));
-    addMark(0.0f, ImColor(0.0f,0.26f,1.0f));
-    addMark(0.05f, ImColor(0.05f,0.98f,0.0f));
+	addMark(0.0f, ImColor(1.0f, 1.0f, 1.0f));
+	addMark(0.5f, ImColor(0.5f, 0.5f, 0.5f));
+   // addMark(0.0f, ImColor(0.0f,0.26f,1.0f));
+   // addMark(0.05f, ImColor(0.05f,0.98f,0.0f));
 }
 
 ImGradient::~ImGradient()

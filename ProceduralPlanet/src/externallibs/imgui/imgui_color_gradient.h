@@ -50,6 +50,7 @@
 #include "imgui.h"
 
 #include <list>
+#include <vector>
 
 struct ImGradientMark
 {
@@ -60,6 +61,7 @@ struct ImGradientMark
 class ImGradient
 {
 public:
+	ImGradient(std::vector<ImGradientMark> marks);
     ImGradient();
     ~ImGradient();
     
