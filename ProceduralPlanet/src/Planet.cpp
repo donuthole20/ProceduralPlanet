@@ -276,7 +276,6 @@ Planet::GLIDs Planet::BindVertexData(Planet::VerticesData* vertices)
 
 	GLCall(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0));
 
-	delete vertices;
 	return id;
 }
 
@@ -292,7 +291,9 @@ void Planet::Draw()
 		for (int i = 0; i < meshDataPerFace.size(); i++)
 		{
 			meshGLIDs.push_back(BindVertexData(meshDataPerFace[i]));
+			delete meshDataPerFace[i];
 		}
+		
 		meshDataPerFace.clear();
 		shader.SetVec2(SHADER_UNIFORM::ELEVATION_MIN_MAX_POSITION, elevationMinMax);
 		triCount = meshGLIDs[0].triCount * 6;

@@ -75,16 +75,22 @@ public:
 	
 	void Randomize()
 	{
-		baseRoughness = 0.7f + static_cast <float> (rand()) / (static_cast <float> (RAND_MAX / (1.5f - 0.7f)));
-		strength = 0.1f + static_cast <float> (rand()) / (static_cast <float> (RAND_MAX / (0.3f - 0.1f)));
-		roughness = 2.0f + static_cast <float> (rand()) / (static_cast <float> (RAND_MAX / (3.0f - 2.2f)));
+	
 		switch (type)
 		{
 			case NoiseType::Simple:
-				minValue = 1.0f + static_cast <float> (rand()) / (static_cast <float> (RAND_MAX / (1.3f - 1.0f)));
+				strength = 0.05f + static_cast <float> (rand()) / (static_cast <float> (RAND_MAX / (0.24f - 0.05f)));
+				baseRoughness = 1.0f + static_cast <float> (rand()) / (static_cast <float> (RAND_MAX / (1.5f - 1.0f)));
+				roughness = 2.8f + static_cast <float> (rand()) / (static_cast <float> (RAND_MAX / (3.5f - 2.8f)));
+				persistence = 0.4f + static_cast <float> (rand()) / (static_cast <float> (RAND_MAX / (0.5f - 0.4f)));
+				minValue = 0.4f + static_cast <float> (rand()) / (static_cast <float> (RAND_MAX / (1.0f - 0.4f)));
 				break;
 			case NoiseType::Rigid:
+				strength = 0.5f + static_cast <float> (rand()) / (static_cast <float> (RAND_MAX / (0.9f - 0.5f)));
+				baseRoughness = 1.5f + static_cast <float> (rand()) / (static_cast <float> (RAND_MAX / (2.0f - 1.5f)));
+				roughness = 3.0f + static_cast <float> (rand()) / (static_cast <float> (RAND_MAX / (4.0f - 3.0f)));
 				minValue = 0.3f + static_cast <float> (rand()) / (static_cast <float> (RAND_MAX / (0.4f - 0.3f)));
+				weightMultiplier = 0.5f + static_cast <float> (rand()) / (static_cast <float> (RAND_MAX / (2.7f - 0.5f)));
 				break;
 		}
 		

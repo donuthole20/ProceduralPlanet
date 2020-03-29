@@ -151,14 +151,15 @@ int main(void)
 			ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
 			ImGui::Text("Triangle count: %d", planet.GetTriCount());//TODO: store this
 			
-			if (planet.IsBusy())
-			{
-				ImGui::NewLine();
-				ImGui::Text("Generating Planet....");
-			}
+			
 
 			ImGui::NewLine();
 			ImGui::Checkbox("Continuos Update", &isContinousUpdate);
+			if (planet.IsBusy())
+			{
+				ImGui::SameLine();
+				ImGui::Text("Generating Planet....");
+			}
 			if (ImGui::Button("Generate") || (isContinousUpdate && counter >= 60 && isEdited && !planet.IsBusy()))
 			{
 				planet.CreatePlanet(resolution, noiseSettings);
@@ -255,7 +256,7 @@ int main(void)
 					isEdited |=ImGui::SliderFloat(std::string("Strength###3" + index).c_str(), &noiseSettings[i].strength, 0.0f, 5.0f);
 					isEdited |=ImGui::SliderFloat(std::string("Roughness###4" + index).c_str(), &noiseSettings[i].roughness, 0.0f, 5.0f);
 					isEdited |=ImGui::SliderFloat(std::string("Persistence###5" + index).c_str(), &noiseSettings[i].persistence, 0.0f, 5.0f);
-					isEdited |=ImGui::SliderFloat(std::string("Min Value###6" + index).c_str(), &noiseSettings[i].minValue, 0.0f, 5.0f);
+					isEdited |=ImGui::SliderFloat(std::string("Min Value###6" + index).c_str(), &noiseSettings[i].minValue, 0.0f, 1.0f);
 					isEdited |=ImGui::SliderFloat3(std::string("Center###7" + index).c_str(), &noiseSettings[i].center.x, 0.0f, 10.0f);
 					if (noiseSettings[i].type == NoiseType::Rigid)
 					{
