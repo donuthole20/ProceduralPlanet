@@ -79,9 +79,9 @@ public:
 		switch (type)
 		{
 			case NoiseType::Simple:
-				strength = 0.05f + static_cast <float> (rand()) / (static_cast <float> (RAND_MAX / (0.24f - 0.05f)));
-				baseRoughness = 1.0f + static_cast <float> (rand()) / (static_cast <float> (RAND_MAX / (1.5f - 1.0f)));
-				roughness = 2.8f + static_cast <float> (rand()) / (static_cast <float> (RAND_MAX / (3.5f - 2.8f)));
+				strength = 0.05f + static_cast <float> (rand()) / (static_cast <float> (RAND_MAX / (0.2f - 0.05f)));
+				baseRoughness = 1.0f + static_cast <float> (rand()) / (static_cast <float> (RAND_MAX / (1.4f - 1.0f)));
+				roughness = 2.7f + static_cast <float> (rand()) / (static_cast <float> (RAND_MAX / (3.0f - 2.7f)));
 				persistence = 0.4f + static_cast <float> (rand()) / (static_cast <float> (RAND_MAX / (0.5f - 0.4f)));
 				minValue = 0.4f + static_cast <float> (rand()) / (static_cast <float> (RAND_MAX / (1.0f - 0.4f)));
 				break;

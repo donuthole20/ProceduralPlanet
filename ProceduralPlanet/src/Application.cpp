@@ -155,17 +155,17 @@ int main(void)
 
 			ImGui::NewLine();
 			ImGui::Checkbox("Continuos Update", &isContinousUpdate);
-			if (planet.IsBusy())
-			{
-				ImGui::SameLine();
-				ImGui::Text("Generating Planet....");
-			}
 			if (ImGui::Button("Generate") || (isContinousUpdate && counter >= 60 && isEdited && !planet.IsBusy()))
 			{
 				planet.CreatePlanet(resolution, noiseSettings);
 				planet.SetTexture(planetTexture);//Note: to resize texture
 				isEdited = false;
 				counter = 0;
+			}
+			if (planet.IsBusy())
+			{
+				ImGui::SameLine();
+				ImGui::Text("Generating Planet....");
 			}
 
 			ImGui::NewLine();
