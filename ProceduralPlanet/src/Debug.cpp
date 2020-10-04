@@ -17,16 +17,16 @@ void Debug::DrawTextureWithoutPadding(std::vector<glm::lowp_u8vec3> textureData,
 	   -1.0f,-1.0f,  0.0f,0.0f,
 	    1.0f,-1.0f,  1.0f,0.0f
 	};
-	unsigned int indices[] =
+	uint32_t indices[] =
 	{
 		1,2,3,
 		1,3,4
 	};
-	unsigned int vertexArrayObjectID;
+	uint32_t vertexArrayObjectID;
 	GLCall(glGenVertexArrays(1, &vertexArrayObjectID));
 	GLCall(glBindVertexArray(vertexArrayObjectID));
 
-	unsigned int vertexBufferID;
+	uint32_t vertexBufferID;
 	GLCall(glGenBuffers(1, &vertexBufferID));
 	GLCall(glBindBuffer(GL_ARRAY_BUFFER, vertexBufferID));
 	GLCall(glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW));//size of array * 3 for 3 floats in a vertex
@@ -36,12 +36,12 @@ void Debug::DrawTextureWithoutPadding(std::vector<glm::lowp_u8vec3> textureData,
 	GLCall(glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), (void*)(sizeof(float) * 2) ));
 	GLCall(glEnableVertexAttribArray(1));
 
-	unsigned int indicesBufferID;
+	uint32_t indicesBufferID;
 	GLCall(glGenBuffers(1, &indicesBufferID));
 	GLCall(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indicesBufferID));
-	GLCall(glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(unsigned int) * 6, indices, GL_STATIC_DRAW));
+	GLCall(glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(uint32_t) * 6, indices, GL_STATIC_DRAW));
 
-	unsigned int textureID;
+	uint32_t textureID;
 	glGenTextures(1, &textureID);
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, textureID);

@@ -17,23 +17,8 @@ uniform mat4 u_projectionMatrix;
 uniform mat4 u_viewMatrix;
 uniform mat4 u_modelMatrix;
 
-
-uniform int u_biomesCount;
-
 uniform float u_time;
 
-float InverseLerp(float value, float min, float max);
-
-float InverseLerp(float value, float min, float max) 
-{
-	return ((value - min)) / (max - min);
-}
-
-float rand2D( vec2 co);
-float rand2D( vec2 co) 
-{
-	return fract(sin(dot(co.xy, vec2(12.9898, 78.233))) * 43758.5453);
-}
 
 vec2 SineWave(vec2 p);
 vec2 SineWave(vec2 p)
@@ -51,30 +36,10 @@ void main()
 {
 
 	float heightPercent = (l_position.y + 1) / 2f;
-	float biomeIndex = 0;
-	float blendRange = (rand2D(l_position.xy)*0.5) / 2 + 0.001f;
 	
-	
-	for (int i = 0; i < u_biomesCount; i++)
-	{
-		int multiplier = i;
-		if (i > 0)
-		{
-			multiplier = i + (i - 1);
-		}
-		float dst = heightPercent - 0.25 * multiplier;
-		
-		float weight = clamp(InverseLerp(dst,-blendRange, blendRange),0,1);
-		biomeIndex *= (1-weight);
-		biomeIndex += i* weight;
-	}
+	biomePercent = heightPercent;
 
-	biomePercent = biomeIndex / max(1, u_biomesCount-1);
-
-	//vCol = vec4(clamp(position,0.0f,1.0f),1.0f);
 	dist = distance(vec3(0.0), l_position.xyz);
-	//dist =	length(position);
-	//gl_Position = projectionMatrix *  modelMatrix * viewMatrix * vec4(position,1.0f);
 
 	vec3 offset = l_normal;
 	if (dist <= 1)
@@ -86,7 +51,6 @@ void main()
 	Normal = mat3(u_modelMatrix) * offset;
 	WorldPos = vec3(u_modelMatrix * vec4(l_position, 1.0));
 	
-	//vCol = vec4(SineWave(position.xy),1.0,1.0);
 	elevation = l_elevation;
 	gl_Position = u_projectionMatrix * u_viewMatrix * vec4(WorldPos, 1.0);
 };
@@ -238,8 +202,6 @@ void main()
 	color = color / (color + vec3(1.0));
 	color = pow(color, vec3(1.0 / 2.2));
 
-	//fragColor = vec4(temp/);
-	
 	fragColor = vec4(color,1.0);
 };
 

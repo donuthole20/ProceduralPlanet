@@ -11,7 +11,7 @@ enum class ShaderType { NONE = -1, VERTEX = 0, FRAGMENT = 1 };
 void WriteShader(std::vector<std::stringstream*>* shadersStream, std::vector<std::string>* filenames, ShaderType type)
 {
 	
-	for (unsigned int i = 0; i < shadersStream->size(); i++)
+	for (uint32_t i = 0; i < shadersStream->size(); i++)
 	{
 		//vertexShaders[i]
 		std::ofstream writer;
@@ -42,7 +42,7 @@ void WriteShader(std::vector<std::stringstream*>* shadersStream, std::vector<std
 		writer.write((*shadersStream)[i]->str().c_str(), shaderSize);
 		writer.close();
 	}
-	for (unsigned int i = 0; i < shadersStream->size(); i++)
+	for (uint32_t i = 0; i < shadersStream->size(); i++)
 	{
 		delete (*shadersStream)[i];
 	}

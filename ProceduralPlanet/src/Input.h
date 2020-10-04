@@ -21,7 +21,7 @@ private:
 public:
 	void RegisterKeyInputCallback(InputListener* listener);
 	void RegisterMousePositionInputCallback(InputListener* listener);
-	void UnRegisterCallback(unsigned int ID);
+	void UnRegisterCallback(uint32_t ID);
 	void ProcessKeyInput(int key, int action);
 	void ProcessCursorPosition(float xpos, float ypos);
 	void UpdateKeyInput(float deltaTime);

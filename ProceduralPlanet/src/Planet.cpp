@@ -34,7 +34,7 @@ Planet::~Planet()
 	meshGLIDs.clear();
 }
 
-void Planet::CreatePlanet(unsigned int resolution, std::vector<NoiseSettings> noiseSettings)
+void Planet::CreatePlanet(uint32_t resolution, std::vector<NoiseSettings> noiseSettings)
 {
 	if (isBusy)
 	{
@@ -46,21 +46,21 @@ void Planet::CreatePlanet(unsigned int resolution, std::vector<NoiseSettings> no
 	elevationMinMax = glm::vec2(0.0f);
 
 #if THREADED == 1
-	meshDataPerFace.clear();
-	meshDataPerFace.reserve(6);
+	meshDataPerFaceToBeBinded.clear();
+	meshDataPerFaceToBeBinded.reserve(6);
 	planetSideMeshFutureHandle.clear();
 	planetSideMeshFutureHandle.reserve(6);
 	for (int i = 0; i < directions.size(); i++)
 	{
 		planetSideMeshFutureHandle.push_back(std::async(std::launch::async, [] 
-			(Planet* planet, unsigned int resolution, std::vector<NoiseSettings> settings,
+			(Planet* planet, uint32_t resolution, std::vector<NoiseSettings> settings,
 			std::vector<Planet::VerticesData*>* futureData, glm::vec3 direction, std::mutex* mutex)
 			{
 				Planet::VerticesData* face = planet->CreatePlanetSide(resolution, settings, direction);
 				std::lock_guard < std::mutex > lock(*mutex);
 				futureData->push_back(face);
 			}, 
-			this, resolution, noiseSettings, &meshDataPerFace, directions[i], &sideCreation_Mutex));
+			this, resolution, noiseSettings, &meshDataPerFaceToBeBinded, directions[i], &sideCreation_Mutex));
 	}
 	
 
@@ -77,7 +77,7 @@ void Planet::CreatePlanet(unsigned int resolution, std::vector<NoiseSettings> no
 #endif 
 }
 
-void Planet::SetTexture(PlanetTexture& texture)
+void Planet::SetTexture(const PlanetTexture& texture)
 {
 	if (!textureID)
 	{
@@ -87,13 +87,9 @@ void Planet::SetTexture(PlanetTexture& texture)
 
 	glBindTexture(GL_TEXTURE_2D, textureID);
 
-	shader.Bind();
-	shader.SetInt(SHADER_UNIFORM::BIOMES_COUNT, texture.biomes.size());
-	shader.Unbind();
-	
 	std::vector<glm::lowp_u8vec3> textureData;
-	unsigned int highestMarkCount = 0;
-	for (unsigned int i = 0; i < texture.biomes.size(); i++)
+	uint32_t highestMarkCount = 0;
+	for (uint32_t i = 0; i < texture.biomes.size(); i++)
 	{
 		if (highestMarkCount < texture.biomes[i]->gradient.getMarks().size())
 		{							 
@@ -101,9 +97,9 @@ void Planet::SetTexture(PlanetTexture& texture)
 		}
 		
 	}
-	unsigned int height = texture.biomes.size();
-	unsigned int textureResolution = resolution * highestMarkCount;
-	unsigned int width = textureResolution * 2;
+	uint32_t height = texture.biomes.size();
+	uint32_t textureResolution = resolution * highestMarkCount;
+	uint32_t width = textureResolution * 2;
 	textureData.reserve((size_t)height * (size_t)width);
 	
 	for (int y = 0; y < height; y++)
@@ -137,27 +133,27 @@ void Planet::SetTexture(PlanetTexture& texture)
 	glBindTexture(GL_TEXTURE_2D, 0);
 }
 
-Planet::VerticesData* Planet::CreatePlanetSide(unsigned int resolution, std::vector<NoiseSettings> noiseSettings,glm::vec3 localUp)
+Planet::VerticesData* Planet::CreatePlanetSide(uint32_t resolution, std::vector<NoiseSettings> noiseSettings,glm::vec3 localUp)
 {
 	Noise noise;
 	VerticesData* data = new VerticesData(resolution);
 	glm::vec3 axisA = glm::vec3(localUp.y, localUp.z, localUp.x);
 	glm::vec3 axisB = glm::cross(localUp, axisA);
 
-	unsigned int triIndex = 0;
+	uint32_t triIndex = 0;
 
-	for (unsigned int y = 0; y < resolution; y++)
+	for (uint32_t y = 0; y < resolution; y++)
 	{
-		for (unsigned int x = 0; x < resolution; x++)
+		for (uint32_t x = 0; x < resolution; x++)
 		{
-			unsigned int i = x + y * resolution;
+			uint32_t i = x + y * resolution;
 			glm::vec2 percent = glm::vec2(x, y);
 			percent /= (resolution - 1);
 			glm::vec3 pointOnUnitCube = localUp + (percent.x - 0.5f) * 2 * axisA + (percent.y - 0.5f) * 2 * axisB;
 			glm::vec3 pointOnUnitSphere = glm::normalize(pointOnUnitCube);
 			float elevation = 0;
 			float firstLayerValue = 0;
-			for (unsigned int noiseFilterIndex = 0; noiseFilterIndex < noiseSettings.size(); noiseFilterIndex++)
+			for (uint32_t noiseFilterIndex = 0; noiseFilterIndex < noiseSettings.size(); noiseFilterIndex++)
 			{
 				float noiseAmount = noiseSettings[noiseFilterIndex].Evaluate(&noise, pointOnUnitSphere);
 				if (noiseFilterIndex == 0)
@@ -208,11 +204,11 @@ Planet::VerticesData* Planet::CreatePlanetSide(unsigned int resolution, std::vec
 	}
 
 	
-	for (unsigned int i = 0; i < data->indices.size(); i += 3)
+	for (uint32_t i = 0; i < data->indices.size(); i += 3)
 	{
-		unsigned int in0 = data->indices[i];
-		unsigned int in1 = data->indices[i + 1];
-		unsigned int in2 = data->indices[i + 2];
+		uint32_t in0 = data->indices[i];
+		uint32_t in1 = data->indices[i + 1];
+		uint32_t in2 = data->indices[i + 2];
 		glm::vec3 v1(data->position[in1] - data->position[in0]);
 		glm::vec3 v2(data->position[in2] - data->position[in0]);
 		glm::vec3 normal = glm::cross(v1, v2);
@@ -225,7 +221,7 @@ Planet::VerticesData* Planet::CreatePlanetSide(unsigned int resolution, std::vec
 
 	/*std::vector<glm::vec3> combinedVertexData;
 	combinedVertexData.reserve(data->position.size() * 2);
-	for (unsigned int i = 0; i < data->position.size(); i++)
+	for (uint32_t i = 0; i < data->position.size(); i++)
 	{
 		combinedVertexData.emplace_back(data->position[i]);
 		combinedVertexData.emplace_back(glm::normalize(data->normals[i]));
@@ -244,17 +240,28 @@ Planet::GLIDs Planet::BindVertexData(Planet::VerticesData* vertices)
 
 	std::vector <float> combinedVertexData;
 	combinedVertexData.reserve((vertices->position.size() * 3 * 2) /*+ vertices->elevations.size()*/);
-	for (unsigned int i =0;i< vertices->position.size();i++)
+	float min = 0.0f;
+	float max = 0.0f;
+	for (uint32_t i =0;i< vertices->position.size();i++)
 	{
 		combinedVertexData.emplace_back(vertices->position[i].x);
 		combinedVertexData.emplace_back(vertices->position[i].y);
 		combinedVertexData.emplace_back(vertices->position[i].z);
+		if (vertices->position[i].y > max)
+		{
+			max = vertices->position[i].y;
+		}
+		if (vertices->position[i].y < min)
+		{
+			min = vertices->position[i].y;
+		}
 		glm::vec3 normal = glm::normalize(vertices->normals[i]);
 		combinedVertexData.emplace_back(normal.x);
 		combinedVertexData.emplace_back(normal.y);
 		combinedVertexData.emplace_back(normal.z);
 		combinedVertexData.emplace_back(vertices->elevations[i]);
 	}
+
 	GLCall(glGenBuffers(1, &id.vertexBufferID));
 	GLCall(glBindBuffer(GL_ARRAY_BUFFER, id.vertexBufferID));
 	GLCall(glBufferData(GL_ARRAY_BUFFER, sizeof(float) * combinedVertexData.size(), &combinedVertexData[0], GL_STATIC_DRAW));//size of array * 3 for 3 floats in a vertex
@@ -272,7 +279,7 @@ Planet::GLIDs Planet::BindVertexData(Planet::VerticesData* vertices)
 	id.triCount = vertices->indices.size();
 	GLCall(glGenBuffers(1, &id.indexBufferID));
 	GLCall(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, id.indexBufferID));
-	GLCall(glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(unsigned int) * vertices->indices.size(), &vertices->indices[0], GL_STATIC_DRAW));
+	GLCall(glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(uint32_t) * vertices->indices.size(), &vertices->indices[0], GL_STATIC_DRAW));
 
 	GLCall(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0));
 
@@ -284,17 +291,17 @@ void Planet::Draw()
 	shader.Bind();
 
 #if THREADED == 1
-	if (meshDataPerFace.size() == 6)
+	if (meshDataPerFaceToBeBinded.size() == 6)
 	{
 		Unbind();
 		meshGLIDs.reserve(6);
-		for (int i = 0; i < meshDataPerFace.size(); i++)
+		for (int i = 0; i < meshDataPerFaceToBeBinded.size(); i++)
 		{
-			meshGLIDs.push_back(BindVertexData(meshDataPerFace[i]));
-			delete meshDataPerFace[i];
+			meshGLIDs.push_back(BindVertexData(meshDataPerFaceToBeBinded[i]));
+			delete meshDataPerFaceToBeBinded[i];
 		}
 		
-		meshDataPerFace.clear();
+		meshDataPerFaceToBeBinded.clear();
 		shader.SetVec2(SHADER_UNIFORM::ELEVATION_MIN_MAX_POSITION, elevationMinMax);
 		triCount = meshGLIDs[0].triCount * 6;
 		isBusy = false;
@@ -336,7 +343,7 @@ bool Planet::IsBusy()
 	return isBusy;
 }
 
-unsigned int Planet::GetTriCount()
+uint32_t Planet::GetTriCount()
 {
 	
 	return triCount;

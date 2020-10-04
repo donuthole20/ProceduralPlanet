@@ -23,8 +23,8 @@ enum class SHADER_UNIFORM
 
 struct PreCompileShaderVariable
 {
-	unsigned int lightCount;
-	PreCompileShaderVariable(unsigned int vlightCount)
+	uint32_t lightCount;
+	PreCompileShaderVariable(uint32_t vlightCount)
 		:lightCount(vlightCount)
 	{}
 };
@@ -33,9 +33,9 @@ class Shader
 {
 private:
 	Shader();
-	unsigned int shaderProgramID;
-	unsigned int CompileShader(unsigned int type, const char* source);
-	std::map<SHADER_UNIFORM, unsigned int> uniformIDs;
+	uint32_t shaderProgramID;
+	uint32_t CompileShader(uint32_t type, const char* source);
+	std::map<SHADER_UNIFORM, uint32_t> uniformIDs;
 
 	void AddUniformID(SHADER_UNIFORM uniform, const char* uniformName);
 public:

@@ -93,7 +93,7 @@ void TerrainFace::BindToGPU()
 	triCount = indices.size();
 	GLCall(glGenBuffers(1, &indexBufferID));
 	GLCall(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indexBufferID));
-	GLCall(glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(unsigned int) * indices.size(), &indices[0], GL_STATIC_DRAW));
+	GLCall(glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(uint32_t) * indices.size(), &indices[0], GL_STATIC_DRAW));
 
 	GLCall(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0));
 

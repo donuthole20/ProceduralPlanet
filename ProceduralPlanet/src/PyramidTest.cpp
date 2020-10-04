@@ -17,7 +17,7 @@ PyramidTest::PyramidTest()
 		0.0f,1.0f,0.0f
 	};
 
-	unsigned int indices[] =
+	uint32_t indices[] =
 	{
 		0,3,1,
 		1,3,2,

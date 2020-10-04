@@ -12,7 +12,7 @@ void Input::RegisterMousePositionInputCallback(InputListener* listener)
 
 
 
-void Input::UnRegisterCallback(unsigned int ID)
+void Input::UnRegisterCallback(uint32_t ID)
 {
 	//TODO: change vector callbacks to another data type that can remove and delete
 }

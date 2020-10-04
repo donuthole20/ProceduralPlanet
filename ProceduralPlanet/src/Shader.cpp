@@ -55,8 +55,8 @@ Shader::Shader(const char* filename, PreCompileShaderVariable preCompiledVariabl
 		}
 	}
 	stream.close();
-	unsigned int vertexShaderID = CompileShader(GL_VERTEX_SHADER, shaderSourceStrings[0].str().c_str());
-	unsigned int fragmentShaderID = CompileShader(GL_FRAGMENT_SHADER, shaderSourceStrings[1].str().c_str());
+	uint32_t vertexShaderID = CompileShader(GL_VERTEX_SHADER, shaderSourceStrings[0].str().c_str());
+	uint32_t fragmentShaderID = CompileShader(GL_FRAGMENT_SHADER, shaderSourceStrings[1].str().c_str());
 
 	shaderProgramID = glCreateProgram();
 	GLCall(glAttachShader(shaderProgramID, vertexShaderID));
@@ -87,17 +87,17 @@ Shader::Shader(const char* filename, PreCompileShaderVariable preCompiledVariabl
 
 void Shader::AddUniformID(SHADER_UNIFORM uniform, const char* uniformName)
 {
-	unsigned int uniformID = glGetUniformLocation(shaderProgramID, uniformName);
+	uint32_t uniformID = glGetUniformLocation(shaderProgramID, uniformName);
 	if (uniformID == -1)
 	{
 		Log::LogError("Unable to find uniform " + std::string(uniformName),false);
 	}
-	uniformIDs.insert(std::pair<SHADER_UNIFORM, unsigned int>(uniform, uniformID));
+	uniformIDs.insert(std::pair<SHADER_UNIFORM, uint32_t>(uniform, uniformID));
 }
 
-unsigned int Shader::CompileShader(unsigned int type, const char* source)
+uint32_t Shader::CompileShader(uint32_t type, const char* source)
 {
-	unsigned int id = glCreateShader(type);
+	uint32_t id = glCreateShader(type);
 	GLCall(glShaderSource(id, 1, &source, nullptr));
 	GLCall(glCompileShader(id));
 

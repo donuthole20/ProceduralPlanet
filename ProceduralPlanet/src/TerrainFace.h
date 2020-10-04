@@ -10,9 +10,9 @@
 class TerrainFace
 {
 	private:
-		unsigned int vertexBufferID;
-		unsigned int indexBufferID;
-		unsigned int vertexArrayObjectID;
+		uint32_t vertexBufferID;
+		uint32_t indexBufferID;
+		uint32_t vertexArrayObjectID;
 		size_t triCount;
 
 		size_t resolution;

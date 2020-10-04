@@ -21,6 +21,7 @@
 #include "PyramidTest.h"
 #include "Noise.h"
 #include "Planet.h"
+#include "PlanetTexture.h"
 
 
 #include "externallibs/imgui/imgui.h"
@@ -31,7 +32,7 @@
 
 int main(void)
 {
-	std::cout << "size_t:" << sizeof(size_t) << " unsigned int:" << sizeof(unsigned int) << "\n";
+	std::cout << "size_t:" << sizeof(size_t) << " uint32_t:" << sizeof(uint32_t) << "\n";
 #ifdef RELEASE
 	ShowWindow( GetConsoleWindow(), SW_HIDE );
 #endif 
@@ -41,7 +42,7 @@ int main(void)
 
 	Window window = Window(1366, 768);
 	
-	unsigned int resolution = 100;
+	uint32_t resolution = 100;
 
 	std::vector<NoiseSettings> noiseSettings;
 
@@ -102,7 +103,7 @@ int main(void)
 	window_flags |= ImGuiWindowFlags_NoResize;
 	window_flags |= ImGuiWindowFlags_NoCollapse;
 
-	int counter = 0;
+	uint32_t countinousUpdateCounter = 0;
 	bool isContinousUpdate = true;
 	bool isEdited = false;
 	bool isTextureEdited = false;
@@ -110,14 +111,7 @@ int main(void)
 
 
 	PlanetTexture planetTexture;
-	//temp
-	planetTexture.waterGradient = new PlanetGradient();
 
-	planetTexture.biomes.reserve(3);
-	planetTexture.biomes.push_back(new PlanetGradient());
-	planetTexture.biomes.push_back(new PlanetGradient());
-	planetTexture.biomes.push_back(new PlanetGradient());
-	
 	planet.SetTexture(planetTexture);
 	/* Loop until the user closes the window */
 	while (!window.IsClosing())
@@ -144,24 +138,26 @@ int main(void)
 		{
 			ImGui::SetNextWindowSize(ImVec2(500, 900), ImGuiCond_FirstUseEver);
 			ImGui::Begin("Settings", NULL,window_flags);
+
 			if (isContinousUpdate)
 			{
-				counter++;
+				countinousUpdateCounter++;
 			}
+
 			ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
 			ImGui::Text("Triangle count: %d", planet.GetTriCount());//TODO: store this
-			
-			
 
 			ImGui::NewLine();
 			ImGui::Checkbox("Continuos Update", &isContinousUpdate);
-			if (ImGui::Button("Generate") || (isContinousUpdate && counter >= 60 && isEdited && !planet.IsBusy()))
+
+			if (ImGui::Button("Generate") || (isContinousUpdate && countinousUpdateCounter >= 60 && isEdited && !planet.IsBusy()))
 			{
 				planet.CreatePlanet(resolution, noiseSettings);
 				planet.SetTexture(planetTexture);//Note: to resize texture
 				isEdited = false;
-				counter = 0;
+				countinousUpdateCounter = 0;
 			}
+
 			if (planet.IsBusy())
 			{
 				ImGui::SameLine();
@@ -169,20 +165,17 @@ int main(void)
 			}
 
 			ImGui::NewLine();
+
 			if (ImGui::Button("Randomize Planet"))
 			{
 				isEdited |= true;
-				for (unsigned int i = 0; i < noiseSettings.size(); i++)
+				for (uint32_t i = 0; i < noiseSettings.size(); i++)
 				{
 					noiseSettings[i].Randomize();
 				}
 
 				isTextureEdited |= true;
-				planetTexture.waterGradient->Randomize();
-				for (int i = (planetTexture.biomes.size() - 1); i >= 0; --i)
-				{
-					planetTexture.biomes[i]->Randomize();
-				}
+				planetTexture.Randomize();
 			}
 			
 		/*	static float debugShaderFloat = 0.0f;
@@ -211,14 +204,14 @@ int main(void)
 
 			if (ImGui::Button("Randomize All Noise"))
 			{
-				for (unsigned int i = 0; i < noiseSettings.size(); i++)
+				for (uint32_t i = 0; i < noiseSettings.size(); i++)
 				{
 					noiseSettings[i].Randomize();
 				}
 				isEdited |= true;
 			}
 
-			for (unsigned int i = 0; i < noiseSettings.size(); i++)
+			for (uint32_t i = 0; i < noiseSettings.size(); i++)
 			{
 				std::string index = std::to_string(i);
 				std::string noiseType;
@@ -275,11 +268,7 @@ int main(void)
 			if (ImGui::Button("Randomize All Color"))
 			{
 				isTextureEdited |= true;
-				planetTexture.waterGradient->Randomize();
-				for (int i = (planetTexture.biomes.size() - 1); i >= 0; --i)
-				{
-					planetTexture.biomes[i]->Randomize();
-				}
+				planetTexture.Randomize();
 			}
 			if (ImGui::CollapsingHeader("Water"))
 			{
@@ -293,12 +282,13 @@ int main(void)
 			}
 			if (ImGui::Button("Add Biome"))
 			{
+				isTextureEdited = true;
 				planetTexture.biomes.push_back(new PlanetGradient());
 			}
 
-			for (int i = (planetTexture.biomes.size() - 1); i >= 0; --i)
+			for (uint32_t i = 0; i < planetTexture.biomes.size(); i++)
 			{
-				std::string header = "Biome " + std::to_string(planetTexture.biomes.size()-i)+ "###"+ std::to_string(i);
+				std::string header = "Biome " + std::to_string(i)+ "###"+ std::to_string(i);
 				if ((ImGui::CollapsingHeader(header.c_str())))
 				{
 					if (ImGui::Button(std::string("Randomize biome " + i).c_str()))
